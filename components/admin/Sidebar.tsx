@@ -58,7 +58,6 @@ export const Sidebar: React.FC = () => {
       title: "Leads & Inquiries",
       items: [
         { label: "Quote Requests", href: "/admin/inquiries/quotes", icon: "💰" },
-        { label: "Contact Messages", href: "/admin/inquiries/contacts", icon: "✉️" },
         { label: "Newsletter Subscribers", href: "/admin/inquiries/subscribers", icon: "📬" },
       ],
     },

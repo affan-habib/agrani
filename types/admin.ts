@@ -83,7 +83,10 @@ export interface AdminUserResource {
 }
 
 export interface AdminLoginResource {
-  token: string;
+  access_token?: string;
+  token?: string;
+  token_type?: string;
+  expires_at?: string;
   user: AdminUserResource;
 }
 

@@ -10,8 +10,9 @@ export const adminAuthApi = {
         device_name: credentials.device_name || "Admin Panel (Browser)",
       }),
     });
-    if (res.data?.token) {
-      setAdminToken(res.data.token);
+    const token = res.data?.access_token || res.data?.token;
+    if (token) {
+      setAdminToken(token);
     }
     return res.data;
   },

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { adminFetch } from "@/lib/admin-api/client";
-import { jobApplicationsApi, quoteRequestsApi, contactsApi } from "@/lib/admin-api/submissions";
+import { jobApplicationsApi, quoteRequestsApi, newsletterSubscribersApi } from "@/lib/admin-api/submissions";
 import { blogPostsApi, careerJobsApi } from "@/lib/admin-api/resources";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 
@@ -12,7 +12,7 @@ export default function AdminDashboardPage() {
     blogPosts: 0,
     activeJobs: 0,
     quoteRequests: 0,
-    contacts: 0,
+    newsletterSubscribers: 0,
     jobApplications: 0,
   });
   const [health, setHealth] = useState<string>("Checking...");
@@ -23,23 +23,26 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadDashboardData() {
       try {
-        const [healthRes, blogs, jobs, quotes, contacts, apps] = await Promise.allSettled([
+        const [healthRes, blogs, jobs, quotes, subs, apps] = await Promise.allSettled([
           adminFetch<{ data: { status: string } }>("/health"),
           blogPostsApi.list({ per_page: 1 }),
           careerJobsApi.list({ per_page: 1 }),
           quoteRequestsApi.list({ per_page: 5 }),
-          contactsApi.list({ per_page: 1 }),
+          newsletterSubscribersApi.list({ per_page: 1 }),
           jobApplicationsApi.list({ per_page: 5 }),
         ]);
 
-        if (healthRes.status === "fulfilled") setHealth("Healthy (v1.0.0)");
-        else setHealth("Connected");
+        if (healthRes.status === "fulfilled" && healthRes.value?.data?.status === "ok") {
+          setHealth("Healthy (v1.0.0)");
+        } else {
+          setHealth("Connected");
+        }
 
         setStats({
           blogPosts: blogs.status === "fulfilled" ? blogs.value.meta?.total || 0 : 0,
           activeJobs: jobs.status === "fulfilled" ? jobs.value.meta?.total || 0 : 0,
           quoteRequests: quotes.status === "fulfilled" ? quotes.value.meta?.total || 0 : 0,
-          contacts: contacts.status === "fulfilled" ? contacts.value.meta?.total || 0 : 0,
+          newsletterSubscribers: subs.status === "fulfilled" ? subs.value.meta?.total || 0 : 0,
           jobApplications: apps.status === "fulfilled" ? apps.value.meta?.total || 0 : 0,
         });
 
@@ -58,7 +61,7 @@ export default function AdminDashboardPage() {
   const statCards = [
     { label: "Quote Requests", value: stats.quoteRequests, href: "/admin/inquiries/quotes", icon: "💰", color: "var(--admin-accent)" },
     { label: "Job Applications", value: stats.jobApplications, href: "/admin/inquiries/applications", icon: "📥", color: "#10b981" },
-    { label: "Contact Inquiries", value: stats.contacts, href: "/admin/inquiries/contacts", icon: "✉️", color: "#3b82f6" },
+    { label: "Subscribers", value: stats.newsletterSubscribers, href: "/admin/inquiries/subscribers", icon: "📬", color: "#3b82f6" },
     { label: "Blog Posts", value: stats.blogPosts, href: "/admin/blog", icon: "📝", color: "#8b5cf6" },
     { label: "Job Openings", value: stats.activeJobs, href: "/admin/careers", icon: "👥", color: "#f59e0b" },
   ];

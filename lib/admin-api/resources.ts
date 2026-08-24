@@ -182,11 +182,11 @@ export const companyValuesApi = {
 
 // Company Capabilities
 export const companyCapabilitiesApi = {
-  list: (params?: ListQueryParams) => adminFetch<ApiPaginatedResponse<CompanyCapabilityResource>>("/admin/capabilities", { params }),
-  get: (id: number) => adminFetch<ApiResponse<CompanyCapabilityResource>>(`/admin/capabilities/${id}`).then(r => r.data),
-  create: (data: StoreCompanyCapabilityRequest) => adminFetch<ApiResponse<CompanyCapabilityResource>>("/admin/capabilities", { method: "POST", body: JSON.stringify(data) }).then(r => r.data),
-  update: (id: number, data: StoreCompanyCapabilityRequest) => adminFetch<ApiResponse<CompanyCapabilityResource>>(`/admin/capabilities/${id}`, { method: "PUT", body: JSON.stringify(data) }).then(r => r.data),
-  delete: (id: number) => adminFetch(`/admin/capabilities/${id}`, { method: "DELETE" }),
+  list: (params?: ListQueryParams) => adminFetch<ApiPaginatedResponse<CompanyCapabilityResource>>("/admin/company-capabilities", { params }),
+  get: (id: number) => adminFetch<ApiResponse<CompanyCapabilityResource>>(`/admin/company-capabilities/${id}`).then(r => r.data),
+  create: (data: StoreCompanyCapabilityRequest) => adminFetch<ApiResponse<CompanyCapabilityResource>>("/admin/company-capabilities", { method: "POST", body: JSON.stringify(data) }).then(r => r.data),
+  update: (id: number, data: StoreCompanyCapabilityRequest) => adminFetch<ApiResponse<CompanyCapabilityResource>>(`/admin/company-capabilities/${id}`, { method: "PUT", body: JSON.stringify(data) }).then(r => r.data),
+  delete: (id: number) => adminFetch(`/admin/company-capabilities/${id}`, { method: "DELETE" }),
 };
 
 // Expertise Roles

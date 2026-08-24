@@ -69,7 +69,9 @@ export async function adminFetch<T>(endpoint: string, options: RequestOptions = 
     headers.set("Content-Type", "application/json");
   }
 
-  if (token && !headers.has("Authorization")) {
+  const isPublicRoute = !endpoint.startsWith("/admin") && !endpoint.includes("/admin/");
+
+  if (!isPublicRoute && token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
@@ -91,7 +93,8 @@ export async function adminFetch<T>(endpoint: string, options: RequestOptions = 
   }
 
   if (!response.ok) {
-    if (response.status === 401) {
+    // Only redirect to login if session restoration failed on /admin/auth/me or explicit unauthenticated error
+    if (response.status === 401 && (endpoint.includes("/admin/auth/me") || (!isPublicRoute && data?.error?.code === "UNAUTHENTICATED"))) {
       if (typeof window !== "undefined" && !window.location.pathname.startsWith("/admin/login")) {
         removeAdminToken();
         window.location.href = "/admin/login";

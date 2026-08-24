@@ -55,7 +55,8 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const data = await adminAuthApi.login(credentials);
-      setTokenState(data.token);
+      const token = data.access_token || data.token || null;
+      setTokenState(token);
       setUser(data.user);
     } finally {
       setIsLoading(false);
