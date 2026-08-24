@@ -64,6 +64,6 @@ export function SiteFooter() {
 }
 
 export function ThemePage({ children, active, includeContact = true }: { children: React.ReactNode; active?: string; includeContact?: boolean }) {
-  const { dark, toggleTheme } = useTheme("dark");
+  const { dark, toggleTheme } = useTheme("light");
   return <main className={dark ? "site dark inner-site" : "site light inner-site"}><SiteHeader dark={dark} toggleTheme={toggleTheme} active={active} />{children}{includeContact && <ContactBlock />}<SiteFooter /></main>;
 }

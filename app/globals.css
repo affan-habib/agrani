@@ -10,12 +10,15 @@ button { cursor: pointer; }
 .site {
   --bg: #f8f8f8; --surface: #fff; --surface-2: #f1f1f1; --text: #051012; --muted: #555;
   --border: #dedede; --deep: #051012; --soft-card: rgba(255,255,255,.84); --footer-muted: #444;
+  --accent: #f15827; --accent-soft: #ffe9e2; --glow: rgba(241,88,39,.18);
   min-height: 100vh; overflow: hidden; background: var(--bg); color: var(--text); transition: background .3s, color .3s;
 }
+.site.light { color-scheme: light; }
 .site.dark {
   color-scheme: dark;
   --bg: #020f11; --surface: #191919; --surface-2: #262626; --text: #f6f6f6; --muted: #aaa;
   --border: #555; --deep: #020f11; --soft-card: rgba(25,25,25,.88); --footer-muted: #a3a3a3;
+  --accent-soft: #39241d; --glow: rgba(241,88,39,.2);
 }
 .container { width: min(1239px, calc(100% - 48px)); margin-inline: auto; }
 .site-header { height: 135px; display: grid; grid-template-columns: 205px 1fr auto; align-items: start; padding-top: 35px; gap: 24px; position: relative; z-index: 50; }
