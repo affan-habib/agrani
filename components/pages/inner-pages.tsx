@@ -22,6 +22,17 @@ const blogCards = [
   ["Our top javascrips frameworks to use", "Olivia Rhye", "08.png"],
 ];
 
+const mobileBlogImages = [
+  `${A}/blog/mobile-whiteboard.png`,
+  `${A}/blog/mobile-glasses.png`,
+  `${A}/blog/10.png`,
+  `${A}/blog/04.png`,
+  `${A}/blog/06.png`,
+  `${A}/blog/08.png`,
+  `${A}/blog/02.png`,
+  `${A}/career/07.jpeg`,
+];
+
 // Apple/Linear smooth cubic bezier curve
 const premiumEase = [0.16, 1, 0.3, 1] as const;
 
@@ -49,8 +60,8 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
       name: "Kamrul Islam",
       role: "Managing Director (25+ yrs experience)",
       title: "A word from the Director",
-      bio: "Driven by integrity, innovation, and a commitment to quality, our leadership team brings decades of experience to every partnership. We focus on building enduring relationships, empowering businesses, and fostering an environment where talent and technology thrive together.",
-      image: `${A}/about/04.png`,
+      bio: "Kamrul Islam is the Managing Director of Agrani Technologies and Services Limited, bringing over 25 years of extensive experience in the IT sector both in Bangladesh and internationally. Under his leadership, the company continues to grow as a trusted name in delivering innovative technology solutions. His deep industry knowledge and strategic vision have been instrumental in driving the organization’s success and commitment to excellence.",
+      image: `${A}/about/director-kamrul.png`,
       align: "right", // image on right
     },
     {
@@ -63,10 +74,10 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
     },
     {
       name: "Hasan Shahid Sarwar, FCA",
-      role: "Director (Finance & Operations)",
+      role: "Finance Director (28+ yrs experience)",
       title: "",
       bio: "Hasan Shahid Sarwar, FCA brings extensive financial expertise, corporate governance, and operational excellence to Agrani Technologies. As Director of Finance & Operations, he oversees fiscal planning, compliance, and institutional sustainability, ensuring Agrani delivers dependable value to all clients and stakeholders.",
-      image: `${A}/about/10.png`,
+      image: `${A}/about/director-hasan.png`,
       align: "right", // image on right
     },
   ];
@@ -486,7 +497,8 @@ export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cas
             >
               <Link href={cases ? "/case-study-details" : "/blog-details"} className="blog-card">
                 <div className="blog-img-wrap">
-                  <Image src={blogImages[i]} fill sizes="(max-width: 768px) 100vw, 608px" alt={title} />
+                  <Image className="blog-image-desktop" src={blogImages[i]} fill sizes="608px" alt={title} />
+                  <Image className="blog-image-mobile" src={mobileBlogImages[i]} fill sizes="100vw" alt="" aria-hidden="true" />
                   <div className="blog-image-meta">
                     <strong>{author}</strong>
                     <span>27, march 2026</span>
@@ -515,14 +527,17 @@ export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cas
 export function BlogDetails() {
   return (
     <>
-      <PageIntro label="Blog Details" title="Digital payments revolution" />
+      <PageIntro label="Blog Details" meta="11 Jan 2025 • 5 min ago posted" title="Digital payments revolution" />
       <article className="article-page container">
         <div className="article-hero-wrap">
-          <Image src={`${A}/blog/04.png`} fill sizes="(max-width: 900px) 100vw, 1240px" alt="Digital payments revolution" priority />
+          <Image className="article-hero-desktop" src={`${A}/blog/04.png`} fill sizes="1240px" alt="Digital payments revolution" priority />
+          <Image className="article-hero-mobile" src={`${A}/blog/mobile-detail-hero.png`} fill sizes="100vw" alt="Two people using digital payment apps" priority />
         </div>
         <aside>
-          <strong>Andrew Jonson</strong>
-          <span>Content Manager</span>
+          <div className="article-author">
+            <Image src={`${A}/blog/mobile-author.png`} width={48} height={48} alt="Andrew Jonson" />
+            <div><strong>Andrew Jonson</strong><span>Content manager</span></div>
+          </div>
           <p>Share this post</p>
           <div className="share-links">
             <a href="#">Facebook</a>
@@ -533,20 +548,46 @@ export function BlogDetails() {
         <div className="article-copy">
           <h2>Introductions</h2>
           <p>
-            Artificial intelligence is transforming payment by improving fraud detection, automating risk assessment and personalizing customer experience. AI systems analyze transaction patterns in real time to flag unusual activity, helping businesses operate securely and efficiently.
+            Digital payments have changed how people exchange value, making everyday transactions faster and more accessible. Secure platforms now connect customers and businesses across devices, locations and services.
           </p>
           <p>
-            Machine learning makes payment experiences faster and more intelligent while maintaining the trust customers expect.
+            Artificial intelligence strengthens this shift by improving fraud detection, automating risk assessment and personalizing each customer experience. AI systems analyze transaction patterns in real time to flag unusual activity while keeping routine payments simple.
+          </p>
+          <p>
+            Thoughtful product design is equally important. Clear steps, familiar language and useful feedback help people understand what is happening at every stage of a payment.
           </p>
           <div className="article-inline-img">
-            <Image src={`${A}/blog/06.png`} fill sizes="(max-width: 768px) 100vw, 600px" alt="Customer using digital payments" />
+            <Image className="article-inline-desktop" src={`${A}/blog/06.png`} fill sizes="600px" alt="Customer using digital payments" />
+            <Image className="article-inline-mobile" src={`${A}/blog/mobile-detail-inline.png`} fill sizes="100vw" alt="Customer reviewing a payment on her phone" />
           </div>
           <blockquote>
-            Digital transformation provides a secure way to handle transactions for all users, simplifying routine tasks and making services more accessible.
+            Artificial intelligence is transforming payment by improving fraud detection, automating risk assessment and personalizing customer experience. AI systems analyze transaction patterns in real time to flag unusual activity, helping businesses operate securely and efficiently.
           </blockquote>
+          <p>
+            Modern payment products must balance convenience with responsibility. Strong identity controls, encrypted infrastructure and transparent records build confidence without making the experience feel complicated.
+          </p>
+          <p>
+            Machine learning can also reduce manual review, surface useful insights and make support teams more effective. The result is a service that feels immediate while remaining dependable behind the scenes.
+          </p>
+          <h2>Why the platform matters</h2>
+          <p>
+            A payment platform is more than a checkout screen. It connects identity, account information, risk decisions, notifications and support into one continuous experience that people can understand and trust.
+          </p>
+          <p>
+            For businesses, that connected view improves reconciliation and makes it easier to identify where customers need help. For customers, it removes repeated steps and provides a clear record of every action.
+          </p>
+          <p>
+            Inclusive design keeps these benefits available across different devices, connection speeds and levels of digital confidence. Small details such as readable status messages and recoverable errors have a meaningful impact.
+          </p>
           <h2>Conclusion</h2>
           <p>
             With smart tools, secure infrastructure and thoughtful customer experiences, modern payment platforms can create more value for everyone.
+          </p>
+          <p>
+            The most successful digital payment experiences keep people informed, protect their information and make complex technology feel effortless.
+          </p>
+          <p>
+            As digital services continue to evolve, the strongest products will pair intelligent automation with human-centered communication at every stage of the journey.
           </p>
         </div>
       </article>
@@ -580,6 +621,12 @@ export function CaseStudyDetails() {
         title={<>Finding and booking<br />salon services shouldn&apos;t be stressful</>}
         copy="Stylii makes it seamless for both customers and salon owners."
       />
+      <section className="case-overview container" aria-label="Project preview">
+        <div className="case-device-frame">
+          <Image src={`${A}/blog/11.png`} fill sizes="(max-width: 768px) 90vw, 760px" alt="Salon booking product preview" priority />
+        </div>
+        <p>A friction-free booking journey designed around real customer needs and practical salon workflows.</p>
+      </section>
       <section className="case-story container">
         <div className="case-lead">
           <h2>Problem &amp;<br />Solutions</h2>
@@ -621,6 +668,10 @@ export function CaseStudyDetails() {
           <div className="research-image-wrap">
             <Image src={`${A}/blog/02.png`} fill sizes="(max-width: 900px) 100vw, 800px" alt="User research" />
           </div>
+          <div className="case-insight-card">
+            <div><strong>72%</strong><span>of customers abandoned an unclear booking flow</span></div>
+            <div className="case-insight-ui"><i /><i /><i /></div>
+          </div>
         </div>
       </section>
 
@@ -636,6 +687,33 @@ export function CaseStudyDetails() {
           </div>
           <h2>From Vision to Final Execution</h2>
           <p>With Stylii, insights turn into an adaptive salon experience that empowers customers and helps owners grow.</p>
+        </div>
+        <div className="case-outcomes">
+          <article>
+            <small>Average booking value</small>
+            <strong>$1000.80</strong>
+            <div className="outcome-chart" aria-hidden="true"><span /></div>
+          </article>
+          <div>
+            <h2>With Stylii insights salon can enhance client experiences.</h2>
+            <p>Clear pricing, preferred stylists and reliable availability help customers book confidently while giving salons better operational visibility.</p>
+          </div>
+        </div>
+        <div className="case-final-image">
+          <Image src={`${A}/blog/02.png`} fill sizes="(max-width: 768px) 100vw, 700px" alt="The final booking experience" />
+        </div>
+        <div className="case-showcase-grid">
+          {[
+            ["Finding and booking salon services made simple", `${A}/blog/02.png`],
+            ["A clearer path from discovery to appointment", `${A}/blog/08.png`],
+            ["Designed to support customers and salon teams", `${A}/career/05.jpeg`],
+          ].map(([title, image]) => (
+            <article key={title}>
+              <div><Image src={image} fill sizes="(max-width: 768px) 100vw, 420px" alt="" /></div>
+              <h3>{title}</h3>
+              <p>Research insights were translated into an accessible, dependable booking journey with clear choices and helpful feedback.</p>
+            </article>
+          ))}
         </div>
         <div className="thanks-block">
           <h2>THANKS<br /><small>For Scrolling Along</small></h2>
@@ -682,6 +760,7 @@ export function TestimonialsPage() {
 }
 
 export function ExpertisePage() {
+  const [openCsr, setOpenCsr] = useState(0);
   const team = [
     "Software Engineers",
     "System Architects",
@@ -742,11 +821,21 @@ export function ExpertisePage() {
               "Security & Compliance",
               "Partnership Affiliations",
               "Corporate Social Responsibility (CSR)",
-            ].map((x) => (
-              <motion.button whileHover={{ x: 4 }} key={x}>
-                {x}
-                <span>⌄</span>
-              </motion.button>
+            ].map((x, i) => (
+              <div className={`csr-item ${openCsr === i ? "open" : ""}`} key={x}>
+                <motion.button whileHover={{ x: 4 }} type="button" aria-expanded={openCsr === i} onClick={() => setOpenCsr(openCsr === i ? -1 : i)}>
+                  {x}
+                  <span>⌄</span>
+                </motion.button>
+                {openCsr === i && (
+                  <ul>
+                    <li>Headquartered in a prime location of the capital.</li>
+                    <li>Secure development labs and server rooms.</li>
+                    <li>Comprehensive customer support and training center.</li>
+                    <li>24/7 monitoring and IT infrastructure management systems.</li>
+                  </ul>
+                )}
+              </div>
             ))}
           </div>
         </div>

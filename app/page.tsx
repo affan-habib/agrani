@@ -557,7 +557,7 @@ export default function Home() {
   const { dark, toggleTheme } = useTheme();
 
   return (
-    <main className={dark ? "site dark" : "site light"}>
+    <main className={dark ? "site dark home-site" : "site light home-site"}>
       <SiteHeader dark={dark} toggleTheme={toggleTheme} active="Home" />
       <Hero />
       <Stats />
@@ -569,4 +569,3 @@ export default function Home() {
     </main>
   );
 }
-

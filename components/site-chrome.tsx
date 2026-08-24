@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/theme";
@@ -212,7 +213,7 @@ export function SiteHeader({ dark, toggleTheme, active }: { dark: boolean; toggl
   );
 }
 
-export function PageIntro({ label, title, copy }: { label: string; title: React.ReactNode; copy?: string }) {
+export function PageIntro({ label, title, copy, meta }: { label: string; title: React.ReactNode; copy?: string; meta?: string }) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 16 }}
@@ -221,6 +222,7 @@ export function PageIntro({ label, title, copy }: { label: string; title: React.
       className="page-intro container"
     >
       <Pill>{label}</Pill>
+      {meta && <p className="page-intro-meta">{meta}</p>}
       <h1>{title}</h1>
       {copy && <p>{copy}</p>}
     </motion.section>
@@ -391,8 +393,10 @@ export function ThemePage({
   includeContact?: boolean;
 }) {
   const { dark, toggleTheme } = useTheme("light");
+  const pathname = usePathname();
+  const routeClass = `route-${pathname.split("/").filter(Boolean).join("-") || "home"}`;
   return (
-    <main className={dark ? "site dark inner-site" : "site light inner-site"}>
+    <main className={`${dark ? "site dark" : "site light"} inner-site ${routeClass}`}>
       <SiteHeader dark={dark} toggleTheme={toggleTheme} active={active} />
       {children}
       {includeContact && <ContactBlock />}
