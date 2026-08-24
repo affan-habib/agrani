@@ -4448,8 +4448,8 @@ textarea:focus {
   }
 }
 
-@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
-  .site [style*="opacity"] {
+@media (prefers-reduced-motion: reduce) {
+  .site [style] {
     opacity: 1 !important;
     transform: none !important;
   }

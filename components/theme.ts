@@ -6,7 +6,7 @@ export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "agrani-theme";
 
-export function useTheme(initialTheme: Theme = "light") {
+export function useTheme(initialTheme: Theme = "dark") {
   const [theme, setTheme] = useState<Theme>(initialTheme);
 
   useEffect(() => {

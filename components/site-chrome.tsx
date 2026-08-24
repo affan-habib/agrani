@@ -392,7 +392,7 @@ export function ThemePage({
   active?: string;
   includeContact?: boolean;
 }) {
-  const { dark, toggleTheme } = useTheme("light");
+  const { dark, toggleTheme } = useTheme("dark");
   const pathname = usePathname();
   const routeClass = `route-${pathname.split("/").filter(Boolean).join("-") || "home"}`;
   return (
