@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/theme";
 
@@ -43,6 +43,31 @@ export function GradientButton({ children, href = "/contact" }: { children: Reac
 
 export function SiteHeader({ dark, toggleTheme, active }: { dark: boolean; toggleTheme: () => void; active?: string }) {
   const [open, setOpen] = useState(false);
+  const [othersOpen, setOthersOpen] = useState(false);
+  const desktopOthersRef = useRef<HTMLDivElement>(null);
+  const mobileOthersRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!othersOpen) return;
+
+    const closeWhenOutside = (event: PointerEvent) => {
+      const target = event.target as Node;
+      const insideDesktop = desktopOthersRef.current?.contains(target);
+      const insideMobile = mobileOthersRef.current?.contains(target);
+      if (!insideDesktop && !insideMobile) setOthersOpen(false);
+    };
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOthersOpen(false);
+    };
+
+    document.addEventListener("pointerdown", closeWhenOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeWhenOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [othersOpen]);
   const links = [
     ["Home", "/"],
     ["About Us", "/about"],
@@ -69,11 +94,42 @@ export function SiteHeader({ dark, toggleTheme, active }: { dark: boolean; toggl
       </button>
 
       <nav className="desktop-nav nav" aria-label="Main navigation">
-        {links.map(([label, href]) => (
+        {links.map(([label, href]) => label === "Others" ? (
+          <div className="nav-dropdown" key={label} ref={desktopOthersRef}>
+            <button
+              type="button"
+              className={`nav-dropdown-trigger ${active === label ? "active" : ""}`}
+              aria-expanded={othersOpen}
+              aria-haspopup="menu"
+              onClick={() => setOthersOpen((value) => !value)}
+            >
+              {active === label && <i />}
+              {label}
+              <b className={othersOpen ? "open" : ""}>⌄</b>
+            </button>
+            <AnimatePresence>
+              {othersOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                  transition={{ duration: 0.18, ease: premiumEase }}
+                  className="nav-dropdown-menu"
+                  role="menu"
+                >
+                  <Link href="/case-studies" role="menuitem" onClick={() => setOthersOpen(false)}>Case Studies</Link>
+                  <Link href="/blog" role="menuitem" onClick={() => setOthersOpen(false)}>Blogs</Link>
+                  <Link href="/customer-experience" role="menuitem" onClick={() => setOthersOpen(false)}>Customer Experience</Link>
+                  <Link href="/expertise" role="menuitem" onClick={() => setOthersOpen(false)}>Our Expertise</Link>
+                  <Link href="/why-choose-us" role="menuitem" onClick={() => setOthersOpen(false)}>Why Choose Us</Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : (
           <Link className={active === label ? "active" : ""} href={href} key={label}>
             {active === label && <i />}
             {label}
-            {label === "Others" && <b>⌄</b>}
           </Link>
         ))}
       </nav>
@@ -107,7 +163,35 @@ export function SiteHeader({ dark, toggleTheme, active }: { dark: boolean; toggl
             className="mobile-nav"
             aria-label="Mobile navigation"
           >
-            {links.map(([label, href]) => (
+            {links.map(([label, href]) => label === "Others" ? (
+              <div className="mobile-nav-group" key={label} ref={mobileOthersRef}>
+                <button
+                  type="button"
+                  className={`mobile-nav-parent ${active === label ? "active" : ""}`}
+                  aria-expanded={othersOpen}
+                  onClick={() => setOthersOpen((value) => !value)}
+                >
+                  <span>{active === label && <i />}{label}</span>
+                  <b className={othersOpen ? "open" : ""}>⌄</b>
+                </button>
+                <AnimatePresence>
+                  {othersOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="mobile-nav-submenu"
+                    >
+                      <Link href="/case-studies" onClick={() => { setOpen(false); setOthersOpen(false); }}>Case Studies</Link>
+                      <Link href="/blog" onClick={() => { setOpen(false); setOthersOpen(false); }}>Blogs</Link>
+                      <Link href="/customer-experience" onClick={() => { setOpen(false); setOthersOpen(false); }}>Customer Experience</Link>
+                      <Link href="/expertise" onClick={() => { setOpen(false); setOthersOpen(false); }}>Our Expertise</Link>
+                      <Link href="/why-choose-us" onClick={() => { setOpen(false); setOthersOpen(false); }}>Why Choose Us</Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
               <Link
                 className={active === label ? "active" : ""}
                 href={href}
@@ -316,4 +400,3 @@ export function ThemePage({
     </main>
   );
 }
-

@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GradientButton, PageIntro, Pill, ThemePage } from "@/components/site-chrome";
+import { GradientButton, PageIntro } from "@/components/site-chrome";
 
 const A = "/assets/figma";
 const pageCopy =
@@ -25,8 +25,24 @@ const blogCards = [
 // Apple/Linear smooth cubic bezier curve
 const premiumEase = [0.16, 1, 0.3, 1] as const;
 
-function AboutPage() {
-  const [tab, setTab] = useState("Our Mission");
+export type AboutTab = "mission" | "vision" | "values";
+
+const aboutTabLabels: Record<AboutTab, "Our Mission" | "Our Vision" | "Our Values"> = {
+  mission: "Our Mission",
+  vision: "Our Vision",
+  values: "Our Values",
+};
+
+export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab }) {
+  const router = useRouter();
+  const [tab, setTab] = useState<AboutTab>(initialTab);
+
+  useEffect(() => setTab(initialTab), [initialTab]);
+
+  const selectTab = (nextTab: AboutTab) => {
+    setTab(nextTab);
+    router.push(`/about?tab=${nextTab}`, { scroll: false });
+  };
 
   const directors = [
     {
@@ -184,15 +200,15 @@ function AboutPage() {
           </div>
 
           <div className="tab-row">
-            {["Our Mission", "Our Vision", "Our Values"].map((x) => (
-              <button className={tab === x ? "active" : ""} onClick={() => setTab(x)} key={x}>
-                {x}
+            {(Object.keys(aboutTabLabels) as AboutTab[]).map((tabKey) => (
+              <button className={tab === tabKey ? "active" : ""} onClick={() => selectTab(tabKey)} key={tabKey}>
+                {aboutTabLabels[tabKey]}
               </button>
             ))}
           </div>
 
           <AnimatePresence mode="wait">
-            {tab === "Our Values" ? (
+            {tab === "values" ? (
               <motion.div
                 key="values"
                 initial={{ opacity: 0, y: 12 }}
@@ -245,7 +261,7 @@ function AboutPage() {
                 <div className="purpose-text">
                   <h3>Coding for a Better Future: Empowering Ideas, Inspiring Innovation</h3>
                   <ul className="purpose-check-list">
-                    {(tab === "Our Mission" ? missionBullets : visionBullets).map((bullet) => (
+                    {(tab === "mission" ? missionBullets : visionBullets).map((bullet) => (
                       <li key={bullet}>
                         <span className="check-icon">✔</span>
                         <span>{bullet}</span>
@@ -315,7 +331,7 @@ function AboutPage() {
   );
 }
 
-function CatalogPage({ products = false }: { products?: boolean }) {
+export function CatalogPage({ products = false }: { products?: boolean }) {
   const [open, setOpen] = useState<number | null>(0);
   const services = products
     ? ["Portfolio", "Industries Served"]
@@ -411,7 +427,26 @@ function CatalogPage({ products = false }: { products?: boolean }) {
   );
 }
 
-function BlogGrid({ cases = false }: { cases?: boolean }) {
+export type BlogCategory = "it-trends" | "ai-automation" | "cybersecurity" | "digital-transformation" | "industry-practices";
+
+const blogCategories: Array<[BlogCategory, string]> = [
+  ["it-trends", "IT trends"],
+  ["ai-automation", "AI and automation"],
+  ["cybersecurity", "Cybersecurity"],
+  ["digital-transformation", "Digital transformation"],
+  ["industry-practices", "Industry best practices"],
+];
+
+export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cases?: boolean; initialCategory?: BlogCategory }) {
+  const router = useRouter();
+  const [category, setCategory] = useState<BlogCategory>(initialCategory);
+
+  useEffect(() => setCategory(initialCategory), [initialCategory]);
+
+  const selectCategory = (nextCategory: BlogCategory) => {
+    setCategory(nextCategory);
+    router.push(`/blog?category=${nextCategory}`, { scroll: false });
+  };
   const blogImages = [
     `${A}/career/05.jpeg`,
     `${A}/light/raw-15.jpeg`,
@@ -433,8 +468,8 @@ function BlogGrid({ cases = false }: { cases?: boolean }) {
       <section className="blog-listing container">
         {!cases && (
           <nav className="blog-category-tabs" aria-label="Blog categories">
-            {["IT trends", "AI and automation", "Cybersecurity", "Digital transformation", "Industry best practices"].map((category, index) => (
-              <button className={index === 0 ? "active" : ""} type="button" key={category}>{category}</button>
+            {blogCategories.map(([categoryKey, label]) => (
+              <button className={category === categoryKey ? "active" : ""} onClick={() => selectCategory(categoryKey)} type="button" key={categoryKey}>{label}</button>
             ))}
           </nav>
         )}
@@ -477,7 +512,7 @@ function BlogGrid({ cases = false }: { cases?: boolean }) {
   );
 }
 
-function BlogDetails() {
+export function BlogDetails() {
   return (
     <>
       <PageIntro label="Blog Details" title="Digital payments revolution" />
@@ -537,7 +572,7 @@ function BlogDetails() {
   );
 }
 
-function CaseStudyDetails() {
+export function CaseStudyDetails() {
   return (
     <>
       <PageIntro
@@ -612,7 +647,7 @@ function CaseStudyDetails() {
 
 const testimonials = ["Mashreef Ahamed", "Zinia Sultana", "Jehana Mowla", "Adam Gwadar"];
 
-function TestimonialsPage() {
+export function TestimonialsPage() {
   return (
     <>
       <PageIntro label="Customer Experience" title="More critics from our clients" copy={pageCopy} />
@@ -646,7 +681,7 @@ function TestimonialsPage() {
   );
 }
 
-function ExpertisePage() {
+export function ExpertisePage() {
   const team = [
     "Software Engineers",
     "System Architects",
@@ -720,7 +755,7 @@ function ExpertisePage() {
   );
 }
 
-function WhyPage() {
+export function WhyPage() {
   const cards = [
     "12+ years experience",
     "100+ Professionals",
@@ -757,7 +792,7 @@ function WhyPage() {
   );
 }
 
-function CareerPage() {
+export function CareerPage() {
   const jobs = [
     { title: "Artist/Designer", tags: ["Design", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
     { title: "UI/UX Designer", tags: ["Design", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
@@ -940,7 +975,7 @@ function CareerPage() {
   );
 }
 
-function ContactPage() {
+export function ContactPage() {
   const info = [
     ["Address", "Plot-174/176, Road-02, Avenue-01, Mirpur DOHS, Dhaka-1216, Bangladesh"],
     ["Phone", "+880-9610944449"],
@@ -982,24 +1017,4 @@ function ContactPage() {
       </section>
     </>
   );
-}
-
-export default function RoutedPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const map: Record<string, [React.ReactNode, string]> = {
-    about: [<AboutPage key="about" />, "About Us"],
-    services: [<CatalogPage key="services" />, "Product and Services"],
-    products: [<CatalogPage products key="products" />, "Product and Services"],
-    blog: [<BlogGrid key="blog" />, "Others"],
-    "blog-details": [<BlogDetails key="blog-details" />, "Others"],
-    "case-studies": [<BlogGrid cases key="cases" />, "Others"],
-    "case-study-details": [<CaseStudyDetails key="case" />, "Others"],
-    "customer-experience": [<TestimonialsPage key="customers" />, "Others"],
-    expertise: [<ExpertisePage key="expertise" />, "Others"],
-    "why-choose-us": [<WhyPage key="why" />, "Others"],
-    career: [<CareerPage key="career" />, "Career"],
-    contact: [<ContactPage key="contact" />, "Contact Us"],
-  };
-  const selected = map[slug] || [<PageIntro key="missing" label="Agrani" title="Page not found" />, ""];
-  return <ThemePage active={selected[1]}>{selected[0]}</ThemePage>;
 }
