@@ -1289,6 +1289,10 @@ textarea:focus {
   position: relative;
 }
 
+.career-hero {
+  margin-top: 130px;
+}
+
 .about-hero img,
 .career-hero img,
 .map img {
@@ -2196,6 +2200,22 @@ textarea:focus {
 }
 
 /* Career Page: Employees Feedback & Job Grids */
+.employee-section {
+  margin-top: 92px;
+  padding: 104px 0 126px;
+  background:
+    radial-gradient(circle at 6% 92%, rgba(241, 88, 39, 0.16), transparent 28%),
+    radial-gradient(circle at 94% 76%, rgba(241, 88, 39, 0.14), transparent 25%);
+}
+
+.employee-section h2 {
+  color: var(--text);
+  font-size: clamp(30px, 3.4vw, 44px);
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+}
+
 .employee-intro-p {
   max-width: 720px;
   margin: 12px auto 40px;
@@ -2203,6 +2223,76 @@ textarea:focus {
   font-size: 15px;
   line-height: 1.55;
   text-align: center;
+}
+
+.testimonials-wrapper {
+  max-width: 1120px;
+  margin: 62px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.testimonials-row {
+  width: calc(100% - 110px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 30px;
+}
+
+.testimonials-row.offset-row {
+  margin-left: 110px;
+}
+
+.employee-section .feedback-card {
+  width: 100%;
+  min-height: 180px;
+  padding: 20px 22px 16px;
+  border-radius: 20px;
+}
+
+.employee-section .feedback-user {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.employee-section .user-avatar {
+  width: 38px;
+  height: 38px;
+}
+
+.employee-section .feedback-user strong {
+  min-width: 0;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.employee-section .stars {
+  color: #ffc107;
+  font-size: 15px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.employee-section .feedback-card p {
+  margin: 14px 0 18px;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.card-footer-row {
+  margin-top: auto;
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid currentColor;
+  color: inherit;
+  font-size: 10.5px;
+  font-weight: 500;
+  opacity: 0.72;
 }
 
 /* ============================================================
@@ -2382,7 +2472,8 @@ textarea:focus {
 }
 
 .job-grid article {
-  background: var(--surface);
+  min-height: 245px;
+  background: color-mix(in srgb, var(--surface) 90%, var(--surface-2));
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 24px 20px;
@@ -2395,16 +2486,16 @@ textarea:focus {
 .opening-badge {
   display: inline-block;
   width: max-content;
-  background: #ffe9e2;
+  background: transparent;
   color: #f15827;
-  padding: 4px 12px;
-  border-radius: 999px;
+  padding: 0;
+  border-radius: 0;
   font-size: 12px;
   font-weight: 500;
 }
 
 .opening-badge.red-badge {
-  background: #ffeded;
+  background: transparent;
   color: #f04438;
 }
 
@@ -2436,6 +2527,14 @@ textarea:focus {
   font-size: 12px;
   font-weight: 400;
   color: var(--muted);
+}
+
+.jobs .job-btn {
+  width: max-content;
+  min-height: 34px;
+  margin-top: 4px;
+  padding: 0 18px;
+  font-size: 12px;
 }
 
 /* Contact Info Grid */
@@ -2667,6 +2766,11 @@ textarea:focus {
   .testimonials-row.offset-row {
     margin-left: 0;
   }
+
+  .employee-section .testimonials-row {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 @media (max-width: 768px) {
@@ -2691,6 +2795,19 @@ textarea:focus {
 
   .testimonials-row {
     grid-template-columns: 1fr;
+  }
+
+  .employee-section {
+    margin-top: 64px;
+    padding: 72px 0 84px;
+  }
+
+  .career-hero {
+    margin-top: 64px;
+  }
+
+  .testimonials-wrapper {
+    margin-top: 44px;
   }
 
   .testimonials {

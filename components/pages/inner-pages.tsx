@@ -794,21 +794,21 @@ export function WhyPage() {
 
 export function CareerPage() {
   const jobs = [
-    { title: "Artist/Designer", tags: ["Design", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
-    { title: "UI/UX Designer", tags: ["Design", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
-    { title: "PHP Developer", tags: ["Design", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
-    { title: "Full-Stack Developer", tags: ["Design", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
+    { title: "Artist/Designer", category: "Design", tags: ["Ontime", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
+    { title: "UI/UX Designer", category: "Design", tags: ["Ontime", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
+    { title: "PHP Developer", category: "Engineering", tags: ["Ontime", "Fulltime"], salary: "25,000 - 60,000" },
+    { title: "Full-Stack Developer", category: "Engineering", tags: ["Ontime", "Fulltime", "Senior Level"], salary: "25,000 - 60,000" },
   ];
   const internships = [
-    { title: "Artist/Designer", tags: ["Design", "Ontime", "Entry Level"], salary: "5,000 - 10,000" },
-    { title: "UI/UX Designer", tags: ["Design", "Ontime", "Entry Level"], salary: "5,000 - 10,000" },
-    { title: "PHP Developer", tags: ["Design", "Ontime", "Entry Level"], salary: "5,000 - 10,000" },
-    { title: "Full-Stack Developer", tags: ["Design", "Ontime", "Entry Level"], salary: "5,000 - 10,000" },
+    { title: "Artist/Designer", category: "Design", tags: ["Ontime", "Fulltime", "Entry Level"], salary: "5,000 - 10,000" },
+    { title: "UI/UX Designer", category: "Design", tags: ["Ontime", "Fulltime", "Entry Level"], salary: "5,000 - 10,000" },
+    { title: "PHP Developer", category: "Engineering", tags: ["Ontime", "Fulltime"], salary: "5,000 - 10,000" },
+    { title: "Full-Stack Developer", category: "Engineering", tags: ["Ontime", "Fulltime", "Senior Level"], salary: "5,000 - 10,000" },
   ];
   const feedbacks = [
     {
       name: "Mashreef Ahamed",
-      avatar: `${A}/career/01.png`,
+      avatar: `${A}/about/10.png`,
       dark: true,
       quote: "This calendar app has been a lifesaver! I used to forget important events, but now I'm always on top of my schedule.",
       roleLeft: "Executive",
@@ -816,7 +816,7 @@ export function CareerPage() {
     },
     {
       name: "Zinia Sultana",
-      avatar: `${A}/career/02.png`,
+      avatar: `${A}/about/08.png`,
       dark: false,
       quote: "Working at Nagorik has been an incredible experience, marked by an innovative work culture and a supportive team that inspires growth...",
       roleLeft: "",
@@ -824,7 +824,7 @@ export function CareerPage() {
     },
     {
       name: "Jehana Mowla",
-      avatar: `${A}/career/03.png`,
+      avatar: `${A}/about/03.png`,
       dark: false,
       quote: "Working at Nagorik Technologies Limited has been an incredibly rewarding experience. An Inspiring and Supportive Work Environment - Truly a Great Place to Grow!",
       roleLeft: "",
@@ -832,7 +832,7 @@ export function CareerPage() {
     },
     {
       name: "Adam Gwadar",
-      avatar: `${A}/career/04.png`,
+      avatar: `${A}/about/04.png`,
       dark: false,
       quote: "Working at Nagorik Technologies Limited has been an incredibly rewarding experience. An Inspiring and Supportive Work Environment - Truly a Great Place to Grow!",
       roleLeft: "",
@@ -844,7 +844,7 @@ export function CareerPage() {
     <>
       <PageIntro
         label="Career"
-        title="Where technology meets opportunity"
+        title={<>Where technology meets<br />opportunity</>}
         copy="Through our comprehensive training, recruitment practices and vibrant work environment, Agrani empowers talent to build meaningful careers."
       />
       <motion.section
@@ -929,7 +929,7 @@ export function CareerPage() {
               whileHover={{ y: -4 }}
               key={j.title}
             >
-              <small className="opening-badge">Opening</small>
+              <small className="opening-badge">{j.category}</small>
               <h3>{j.title}</h3>
               <div className="job-tags">
                 {j.tags.map((t) => (
@@ -956,7 +956,7 @@ export function CareerPage() {
               whileHover={{ y: -4 }}
               key={j.title}
             >
-              <small className="opening-badge red-badge">Opening</small>
+              <small className="opening-badge red-badge">{j.category}</small>
               <h3>{j.title}</h3>
               <div className="job-tags">
                 {j.tags.map((t) => (
