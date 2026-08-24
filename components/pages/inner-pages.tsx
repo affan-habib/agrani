@@ -74,7 +74,7 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
     },
     {
       name: "Hasan Shahid Sarwar, FCA",
-      role: "Finance Director (28+ yrs experience)",
+      role: "Director (Finance & Operations)",
       title: "",
       bio: "Hasan Shahid Sarwar, FCA brings extensive financial expertise, corporate governance, and operational excellence to Agrani Technologies. As Director of Finance & Operations, he oversees fiscal planning, compliance, and institutional sustainability, ensuring Agrani delivers dependable value to all clients and stakeholders.",
       image: `${A}/about/director-hasan.png`,
@@ -193,6 +193,7 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
                 height={590}
                 alt={director.name}
                 className="director-photo"
+                loading="eager"
               />
             </div>
           </motion.div>
@@ -459,14 +460,14 @@ export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cas
     router.push(`/blog?category=${nextCategory}`, { scroll: false });
   };
   const blogImages = [
-    `${A}/career/05.jpeg`,
-    `${A}/light/raw-15.jpeg`,
+    `${A}/blog/desktop-whiteboard.jpg`,
+    `${A}/blog/desktop-glasses.jpg`,
     `${A}/blog/10.png`,
     `${A}/blog/04.png`,
     `${A}/blog/06.png`,
     `${A}/blog/08.png`,
     `${A}/blog/02.png`,
-    `${A}/career/07.jpeg`,
+    `${A}/blog/desktop-code.jpg`,
   ];
 
   return (
@@ -497,8 +498,8 @@ export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cas
             >
               <Link href={cases ? "/case-study-details" : "/blog-details"} className="blog-card">
                 <div className="blog-img-wrap">
-                  <Image className="blog-image-desktop" src={blogImages[i]} fill sizes="608px" alt={title} />
-                  <Image className="blog-image-mobile" src={mobileBlogImages[i]} fill sizes="100vw" alt="" aria-hidden="true" />
+                  <Image className="blog-image-desktop" src={blogImages[i]} fill sizes="608px" alt={title} loading="eager" />
+                  <Image className="blog-image-mobile" src={mobileBlogImages[i]} fill sizes="100vw" alt="" aria-hidden="true" loading="eager" />
                   <div className="blog-image-meta">
                     <strong>{author}</strong>
                     <span>27, march 2026</span>
@@ -530,7 +531,7 @@ export function BlogDetails() {
       <PageIntro label="Blog Details" meta="11 Jan 2025 • 5 min ago posted" title="Digital payments revolution" />
       <article className="article-page container">
         <div className="article-hero-wrap">
-          <Image className="article-hero-desktop" src={`${A}/blog/04.png`} fill sizes="1240px" alt="Digital payments revolution" priority />
+          <Image className="article-hero-desktop" src={`${A}/blog/desktop-detail-hero.jpg`} fill sizes="1240px" alt="Digital payments revolution" priority />
           <Image className="article-hero-mobile" src={`${A}/blog/mobile-detail-hero.png`} fill sizes="100vw" alt="Two people using digital payment apps" priority />
         </div>
         <aside>
@@ -557,7 +558,7 @@ export function BlogDetails() {
             Thoughtful product design is equally important. Clear steps, familiar language and useful feedback help people understand what is happening at every stage of a payment.
           </p>
           <div className="article-inline-img">
-            <Image className="article-inline-desktop" src={`${A}/blog/06.png`} fill sizes="600px" alt="Customer using digital payments" />
+            <Image className="article-inline-desktop" src={`${A}/blog/desktop-detail-inline.jpg`} fill sizes="600px" alt="Customer using digital payments" />
             <Image className="article-inline-mobile" src={`${A}/blog/mobile-detail-inline.png`} fill sizes="100vw" alt="Customer reviewing a payment on her phone" />
           </div>
           <blockquote>
@@ -599,7 +600,7 @@ export function BlogDetails() {
             <motion.div key={t} whileHover={{ y: -4 }}>
               <Link className="blog-card" href="/blog-details">
                 <div className="blog-img-wrap">
-                  <Image src={`${A}/blog/${img}`} fill sizes="(max-width: 768px) 100vw, 590px" alt={t} />
+                  <Image src={`${A}/blog/${img}`} fill sizes="(max-width: 768px) 100vw, 590px" alt={t} loading="eager" />
                 </div>
                 <small>{a}</small>
                 <h3>{t}</h3>
@@ -723,7 +724,12 @@ export function CaseStudyDetails() {
   );
 }
 
-const testimonials = ["Mashreef Ahamed", "Zinia Sultana", "Jehana Mowla", "Adam Gwadar"];
+const testimonials = [
+  { name: "Mashreef Ahamed", avatar: `${A}/about/10.png` },
+  { name: "Zinia Sultana", avatar: `${A}/about/08.png` },
+  { name: "Jehana Mowla", avatar: `${A}/about/03.png` },
+  { name: "Adam Gwadar", avatar: `${A}/about/04.png` },
+];
 
 export function TestimonialsPage() {
   return (
@@ -732,18 +738,19 @@ export function TestimonialsPage() {
       <section className="testimonials container">
         {[...Array(3)]
           .flatMap(() => testimonials)
-          .map((name, i) => (
+          .slice(0, 10)
+          .map((testimonial, i) => (
             <motion.article
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: (i % 4) * 0.1 }}
               whileHover={{ y: -4 }}
-              key={`${name}-${i}`}
+              key={`${testimonial.name}-${i}`}
             >
               <div>
-                <span className="avatar">{name[0]}</span>
-                <strong>{name}</strong>
+                <Image className="avatar" src={testimonial.avatar} width={36} height={36} alt="" />
+                <strong>{testimonial.name}</strong>
                 <b>★★★★★</b>
               </div>
               <p>

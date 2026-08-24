@@ -254,7 +254,7 @@ export function ContactBlock() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="quote-wrap"
       >
-        <Image className="quote-bg" src={`${A}/light/raw-02.png`} fill sizes="(max-width: 768px) 100vw, 710px" alt="" />
+        <Image className="quote-bg" src={`${A}/light/raw-02.png`} fill sizes="(max-width: 768px) 100vw, 710px" alt="" loading="eager" />
         <form className="quote-form" onSubmit={(e) => e.preventDefault()}>
           <h3>Request for Personal Quote</h3>
           <label>
@@ -305,7 +305,7 @@ export function SiteFooter() {
     <footer className="footer container" id="footer">
       <div className="footer-left">
         <Link href="/" aria-label="Agrani home">
-          <Image className="footer-logo" src={`${A}/icons/logo-footer.svg`} width={205} height={57} alt="Agrani Technologies & Services Limited" />
+          <Image className="footer-logo" src={`${A}/icons/logo-footer.svg`} width={205} height={57} alt="Agrani Technologies & Services Limited" loading="eager" />
         </Link>
         <p>Agrani Technology is the highest rated Software<br />solution expert team in the world.</p>
         
@@ -348,7 +348,7 @@ export function SiteFooter() {
       </div>
 
       <div className="footer-right">
-        <Image className="footer-photo" src={`${A}/light/raw-05.png`} width={710} height={390} alt="Agrani technology consultation" />
+        <Image className="footer-photo" src={`${A}/light/raw-05.png`} width={710} height={390} alt="Agrani technology consultation" loading="eager" />
         <h3>Newsletter</h3>
         <p>Stay Updated with latest news and offers!</p>
         <form className="newsletter" onSubmit={(e) => e.preventDefault()}>

@@ -4442,9 +4442,531 @@ textarea:focus {
 
   .route-case-study-details .case-showcase-grid p {
     font-size: 12px;
+  }
 
   .route-case-study-details .thanks-block h2 {
     font-size: 48px;
+  }
+}
+
+/* ============================================================
+   FINAL DESKTOP COMPOSITION (1440PX FIGMA BOARDS)
+   Kept separate from tablet/mobile so the supplied mobile layouts
+   retain their route-specific proportions.
+   ============================================================ */
+
+@media (min-width: 1101px) {
+  .page-intro {
+    padding: 42px 0 72px;
+  }
+
+  .page-intro h1 {
+    margin-top: 24px;
+  }
+
+  /* Shared quote and footer composition */
+  .contact-section {
+    min-height: 920px;
+    padding-block: 120px;
+    gap: 92px;
+  }
+
+  .quote-wrap {
+    min-height: 620px;
+  }
+
+  .quote-form input,
+  .quote-form select,
+  .quote-form textarea,
+  .quote-form .phone-input {
+    border-color: #dedede;
+    background: #ffffff;
+    color: #222222;
+  }
+
+  .quote-form input::placeholder,
+  .quote-form textarea::placeholder {
+    color: #8e8e8e;
+  }
+
+  .quote-form .phone-input input {
+    background: transparent;
+  }
+
+  .form-submit-btn {
+    width: max-content;
+    min-width: 78px;
+    min-height: 44px;
+    padding-inline: 22px;
+  }
+
+  .footer {
+    min-height: 860px;
+    padding: 130px 0 150px;
+    align-items: start;
+  }
+
+  .footer-photo {
+    min-height: 300px;
+  }
+
+  /* Home */
+  .home-site .services-section {
+    padding: 105px 0 92px;
+  }
+
+  .home-site .service-card {
+    min-height: 480px;
+    padding: 34px;
+  }
+
+  .home-site .sectors-section {
+    padding: 110px 0 140px;
+  }
+
+  .home-site .sector-grid {
+    min-height: 860px;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 26px;
+  }
+
+  .home-site .sector-card {
+    padding: 40px 44px 0;
+  }
+
+  .home-site .why-section {
+    min-height: 860px;
+    padding-block: 120px;
+  }
+
+  /* About */
+  .route-about .about-hero {
+    height: 600px;
+  }
+
+  .route-about .directors-section {
+    padding-block: 118px 145px;
+    gap: 105px;
+  }
+
+  .route-about .director-row {
+    min-height: 445px;
+    align-items: center;
+  }
+
+  .route-about .director-row:first-child {
+    min-height: 590px;
+  }
+
+  .route-about .director-bio p {
+    font-size: 15px;
+  }
+
+  .route-about .purpose-section {
+    min-height: 940px;
+    padding: 112px 0 125px;
+  }
+
+  .route-about .purpose-body,
+  .route-about .purpose-values-layout {
+    min-height: 500px;
+    margin-top: 54px;
+  }
+
+  .route-about .purpose-values-layout .values-proof-card {
+    min-height: 360px;
+  }
+
+  .route-about .testimonials-marquee-section {
+    min-height: 720px;
+    padding: 115px 0 130px;
+  }
+
+  .route-about .feedback-card {
+    min-height: 210px;
+  }
+
+  /* Product and service accordions */
+  .route-services .catalog,
+  .route-products .catalog {
+    padding-bottom: 210px;
+  }
+
+  .route-services .catalog-list,
+  .route-products .catalog-list {
+    gap: 14px;
+    margin-top: 44px;
+  }
+
+  .route-services .catalog-list article > button {
+    min-height: 116px;
+    padding-inline: 40px;
+  }
+
+  .route-services .catalog-list article.open > button {
+    min-height: 104px;
+  }
+
+  .route-services .catalog-list article.open .catalog-details {
+    min-height: 230px;
+    padding: 0 42px 42px 116px;
+    justify-content: center;
+  }
+
+  .route-products .catalog-list article > button {
+    min-height: 128px;
+    padding-inline: 40px;
+  }
+
+  .route-products .catalog-list article.open .catalog-details {
+    min-height: 220px;
+    padding: 0 42px 42px 116px;
+    justify-content: center;
+  }
+
+  /* Blog and case-study listings */
+  .route-blog .blog-listing,
+  .route-case-studies .blog-listing {
+    padding-top: 150px;
+    padding-bottom: 150px;
+  }
+
+  .route-blog .blog-grid,
+  .route-case-studies .blog-grid {
+    row-gap: 58px;
+  }
+
+  .route-blog .blog-card > p {
+    min-height: 62px;
+  }
+
+  .route-blog-details .article-page {
+    padding-bottom: 130px;
+    row-gap: 70px;
+  }
+
+  .route-blog-details .article-hero-wrap {
+    height: 600px;
+  }
+
+  .route-blog-details .article-copy {
+    max-width: 760px;
+  }
+
+  .route-blog-details .article-inline-img {
+    height: 360px;
+    margin-block: 42px;
+  }
+
+  .route-blog-details .similar {
+    padding: 100px 0 150px;
+  }
+
+  /* The long-form case-study board uses a deliberately editorial,
+     staggered composition rather than a compact three-column summary. */
+  .route-case-study-details .case-overview {
+    padding: 70px 0 150px;
+  }
+
+  .route-case-study-details .case-device-frame {
+    width: 820px;
+    height: 560px;
+  }
+
+  .route-case-study-details .case-story {
+    min-height: 1600px;
+    padding: 150px 0;
+  }
+
+  .route-case-study-details .case-lead {
+    grid-template-columns: 360px 1fr;
+    gap: 100px;
+  }
+
+  .route-case-study-details .problem-flow {
+    min-height: 1120px;
+    margin-top: 100px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, 1fr);
+    gap: 32px 120px;
+    position: relative;
+  }
+
+  .route-case-study-details .problem-flow::before {
+    content: "";
+    position: absolute;
+    top: 18%;
+    bottom: 18%;
+    left: 50%;
+    width: 2px;
+    background: linear-gradient(#f15827, rgba(241, 88, 39, 0.12));
+  }
+
+  .route-case-study-details .problem-flow article {
+    min-height: 350px;
+    padding: 42px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+
+  .route-case-study-details .problem-flow article:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .route-case-study-details .problem-flow article:nth-child(2) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .route-case-study-details .problem-flow article:nth-child(3) {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .route-case-study-details .research-section {
+    min-height: 1740px;
+    padding: 150px 0;
+    background: #151818;
+  }
+
+  .route-case-study-details .research-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 54px;
+    margin: 85px 0 100px;
+  }
+
+  .route-case-study-details .research-stats article {
+    min-height: 330px;
+    padding: 30px;
+    text-align: center;
+  }
+
+  .route-case-study-details .research-stats article::before {
+    content: "";
+    display: block;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 34px;
+    border-radius: 50%;
+    background: conic-gradient(#f15827 0 72%, #efe7e2 72% 100%);
+  }
+
+  .route-case-study-details .research-image-wrap {
+    width: 52%;
+    height: 520px;
+  }
+
+  .route-case-study-details .case-insight-card {
+    min-height: 330px;
+    margin-top: 90px;
+  }
+
+  .route-case-study-details .case-finale {
+    min-height: 3420px;
+    padding: 130px 0 140px;
+    align-content: start;
+    row-gap: 90px;
+  }
+
+  .route-case-study-details .case-mockups {
+    grid-column: 1 / -1;
+    height: 750px;
+    gap: 34px;
+  }
+
+  .route-case-study-details .case-mockups span {
+    border-radius: 40px;
+  }
+
+  .route-case-study-details .finale-copy {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 72px;
+    align-items: center;
+  }
+
+  .route-case-study-details .finale-img-wrap {
+    height: 580px;
+    margin: 0;
+  }
+
+  .route-case-study-details .case-outcomes {
+    min-height: 520px;
+    padding: 55px;
+  }
+
+  .route-case-study-details .case-final-image {
+    height: 720px;
+  }
+
+  .route-case-study-details .case-showcase-grid {
+    gap: 34px;
+  }
+
+  .route-case-study-details .case-showcase-grid article > div {
+    height: 430px;
+  }
+
+  .route-case-study-details .thanks-block {
+    min-height: 350px;
+    display: grid;
+    place-items: center;
+  }
+
+  /* Customer Experience */
+  .route-customer-experience .testimonials {
+    padding-top: 60px;
+    padding-bottom: 150px;
+    gap: 28px;
+  }
+
+  .route-customer-experience .testimonials article {
+    min-height: 190px;
+    padding: 28px 32px;
+  }
+
+  .route-customer-experience .testimonials article:nth-child(4n + 3) {
+    margin-left: 120px;
+  }
+
+  /* Expertise */
+  .route-expertise .expertise {
+    padding-bottom: 170px;
+  }
+
+  .route-expertise .expertise > h2 {
+    margin-top: 120px;
+  }
+
+  .route-expertise .feature-grid {
+    gap: 20px;
+    margin-top: 38px;
+  }
+
+  .route-expertise .feature-grid article {
+    min-height: 345px;
+    padding: 34px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .route-expertise .feature-grid article p {
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+
+  .route-expertise .feature-grid article small {
+    margin-top: auto;
+  }
+
+  .route-expertise .technology-grid {
+    max-width: 100%;
+    gap: 16px;
+    margin-top: 38px;
+  }
+
+  .route-expertise .technology-grid article {
+    min-height: 270px;
+    padding: 34px;
+  }
+
+  .route-expertise .technology-grid article h3 {
+    margin-bottom: 46px;
+  }
+
+  .route-expertise .csr {
+    min-height: 850px;
+    margin-top: 170px;
+    padding-top: 60px;
+    gap: 90px;
+  }
+
+  .route-expertise .csr > h2 {
+    font-size: 42px;
+    line-height: 1.22;
+  }
+
+  .route-expertise .csr button {
+    min-height: 90px;
+    padding-inline: 28px;
+    font-size: 18px;
+  }
+
+  /* Why Choose Us masonry */
+  .route-why-choose-us .why-cards {
+    min-height: 1760px;
+    padding-top: 100px;
+    padding-bottom: 170px;
+    grid-template-areas:
+      "one two three"
+      "four five three"
+      "four six six"
+      "seven eight nine";
+    grid-template-rows: repeat(4, 1fr);
+    gap: 18px;
+  }
+
+  .route-why-choose-us .why-cards article {
+    min-height: 0;
+    padding: 34px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .route-why-choose-us .why-cards article p {
+    margin-top: auto;
+    line-height: 1.6;
+  }
+
+  .route-why-choose-us .why-cards article:nth-child(1) { grid-area: one; }
+  .route-why-choose-us .why-cards article:nth-child(2) { grid-area: two; }
+  .route-why-choose-us .why-cards article:nth-child(3) { grid-area: three; }
+  .route-why-choose-us .why-cards article:nth-child(4) { grid-area: four; }
+  .route-why-choose-us .why-cards article:nth-child(5) { grid-area: five; }
+  .route-why-choose-us .why-cards article:nth-child(6) { grid-area: six; }
+  .route-why-choose-us .why-cards article:nth-child(7) { grid-area: seven; }
+  .route-why-choose-us .why-cards article:nth-child(8) { grid-area: eight; }
+  .route-why-choose-us .why-cards article:nth-child(9) { grid-area: nine; }
+
+  /* Career */
+  .route-career .career-hero {
+    height: 610px;
+    margin-top: 150px;
+  }
+
+  .route-career .employee-section {
+    margin-top: 130px;
+    padding: 115px 0 130px;
+  }
+
+  .route-career .jobs {
+    padding: 95px 0 120px;
+  }
+
+  .route-career .job-grid article {
+    min-height: 270px;
+  }
+
+  /* Contact */
+  .route-contact .map {
+    height: 650px;
+    margin-top: 110px;
+  }
+
+  .route-contact .info-grid {
+    padding: 50px 0 130px;
+  }
+
+  .route-contact .info-grid article {
+    min-height: 240px;
+    padding: 30px;
   }
 }
 
