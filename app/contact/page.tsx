@@ -1,6 +1,8 @@
-import { ContactPage } from "@/components/pages/inner-pages";
 import { ThemePage } from "@/components/site-chrome";
+import { publicApi } from "@/lib/public-api/services";
+import { ContactContent } from "./contact-content";
 
-export default function ContactRoute() {
-  return <ThemePage active="Contact Us"><ContactPage /></ThemePage>;
+export default async function ContactRoute() {
+  const [data, home] = await Promise.all([publicApi.getContactPage(), publicApi.getHome()]);
+  return <ThemePage active="Contact Us" quote={data.quote} siteSettings={home.site_settings}><ContactContent data={data} /></ThemePage>;
 }

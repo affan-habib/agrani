@@ -7,6 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/theme";
 import { publicApi } from "@/lib/public-api/services";
+import { resolveMediaUrl } from "@/lib/public-api/media";
+import type { QuoteContent, SiteSettings } from "@/types/public";
 
 const A = "/assets/figma";
 
@@ -230,7 +232,7 @@ export function PageIntro({ label, title, copy, meta }: { label: string; title: 
   );
 }
 
-export function ContactBlock() {
+export function ContactBlock({ quote }: { quote?: QuoteContent }) {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -248,13 +250,12 @@ export function ContactBlock() {
     setError(null);
     try {
       await publicApi.submitQuoteRequest({
-        name: (form.firstName + " " + form.lastName).trim(),
-        email: form.firstName.toLowerCase() + "." + form.lastName.toLowerCase() + "@client.com",
+        first_name: form.firstName,
+        last_name: form.lastName,
         phone: form.phone,
-        service_type: "General Request",
-        budget_range: "Flexible",
-        project_details: "Location/City: " + form.city + "\n\nRequirements:\n" + form.message,
-        source_page: typeof window !== "undefined" ? window.location.pathname : "Website",
+        city: form.city,
+        message: form.message,
+        source_page: quote?.source_page || (typeof window !== "undefined" ? window.location.pathname : undefined),
       });
       setSubmitted(true);
       setForm({ firstName: "", lastName: "", phone: "", city: "Dhaka", message: "" });
@@ -274,12 +275,8 @@ export function ContactBlock() {
         transition={{ duration: 0.5 }}
         className="contact-copy"
       >
-        <h2>
-          We&apos;re just a<br />message away—<br />reach out and<br />let&apos;s discuss how<br />we can help.
-        </h2>
-        <p>
-          Whether you&apos;re looking to develop custom software, modernize legacy systems, or need strategic technology consulting, our team is ready to turn your ideas into scalable solutions.
-        </p>
+        {quote?.title && <h2>{quote.title}</h2>}
+        {quote?.description && <p>{quote.description}</p>}
       </motion.div>
 
       <motion.div
@@ -291,7 +288,7 @@ export function ContactBlock() {
       >
         <Image className="quote-bg" src={A + "/light/raw-02.png"} fill sizes="(max-width: 768px) 100vw, 710px" alt="" loading="eager" />
         <form className="quote-form" onSubmit={handleSubmit}>
-          <h3>Request for Personal Quote</h3>
+          <h3>{quote?.form_title}</h3>
 
           {submitted && (
             <div style={{ background: "rgba(16, 185, 129, 0.15)", border: "1px solid #10b981", color: "#10b981", padding: "0.75rem 1rem", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>
@@ -332,7 +329,8 @@ export function ContactBlock() {
             <div className="phone-input">
               <Image src={A + "/light/raw-14.png"} width={34} height={20} alt="Country selector" />
               <input
-                type="tel"
+              type="tel"
+                required
                 placeholder="+880 1234 567890"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -377,20 +375,10 @@ export function ContactBlock() {
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ settings }: { settings?: SiteSettings }) {
   const [email, setEmail] = useState("");
   const [subscribing, setSubscribing] = useState(false);
   const [subscribeStatus, setSubscribeStatus] = useState<string | null>(null);
-  const [settings, setSettings] = useState<any>(null);
-
-  useEffect(() => {
-    publicApi.getContactPage()
-      .then((data: any) => {
-        if (data?.site_settings) setSettings(data.site_settings);
-      })
-      .catch(() => {});
-  }, []);
-
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
@@ -409,21 +397,18 @@ export function SiteFooter() {
 
   const contact = settings?.contact;
   const company = settings?.company;
-  const socialLinks = settings?.social?.links || [
-    { label: "Facebook", url: "https://facebook.com" },
-    { label: "Twitter", url: "https://twitter.com" },
-    { label: "LinkedIn", url: "https://linkedin.com" },
-  ];
+  const socialLinks = settings?.social?.links || [];
 
   const addressLine = contact?.address?.line_1
     ? `${contact.address.line_1}, ${contact.address.city || ""}-${contact.address.postal_code || ""}, ${contact.address.country || "Bangladesh"}`
-    : "Plot-174/176, Road-02, Avenue-01, Mirpur DOHS, Dhaka-1216, Bangladesh";
+    : "";
 
-  const phone = contact?.primary_phone || "+880-9610944449";
-  const emailAddr = contact?.primary_email || "info@agranitechbd.com";
-  const websiteUrl = company?.website_url || "https://www.agranitechbd.com";
-  const hours = contact?.business_hours || "Mon-Fri 9am-6pm";
-  const copyrightText = settings?.footer?.copyright || "Copyright © 2026 Agrani Technologies. All rights reserved.";
+  const phone = contact?.primary_phone || "";
+  const emailAddr = contact?.primary_email || "";
+  const websiteUrl = company?.website_url || "";
+  const hours = contact?.business_hours || "";
+  const copyrightText = settings?.footer?.copyright || "";
+  const footerImage = resolveMediaUrl(settings?.branding?.footer_image, A + "/light/raw-05.png");
 
   return (
     <footer className="footer container" id="footer">
@@ -431,7 +416,7 @@ export function SiteFooter() {
         <Link href="/" aria-label="Agrani home">
           <Image className="footer-logo" src={A + "/icons/logo-footer.svg"} width={205} height={57} alt="Agrani Technologies & Services Limited" loading="eager" />
         </Link>
-        <p>{settings?.footer?.description || "Agrani Technology is the highest rated Software solution expert team in the world."}</p>
+        {settings?.footer?.description && <p>{settings.footer.description}</p>}
         
         <h3>Navigations</h3>
         <div className="footer-nav">
@@ -446,27 +431,27 @@ export function SiteFooter() {
         </div>
 
         <h3>Our Location</h3>
-        <address>{addressLine}</address>
-        <a className="underlined" href={websiteUrl} target="_blank" rel="noopener noreferrer">
+        {addressLine && <address>{addressLine}</address>}
+        {websiteUrl && <a className="underlined" href={websiteUrl} target="_blank" rel="noopener noreferrer">
           {websiteUrl.replace(/^https?:\/\//, "")}
-        </a>
+        </a>}
         
         <div className="contact-line">
-          <a href={`tel:${phone}`}>{phone}</a>
-          <a href={`mailto:${emailAddr}`}>{emailAddr}</a>
+          {phone && <a href={`tel:${phone}`}>{phone}</a>}
+          {emailAddr && <a href={`mailto:${emailAddr}`}>{emailAddr}</a>}
         </div>
-        <p>{hours}</p>
+        {hours && <p>{hours}</p>}
         
         <div className="social-dots">
           {socialLinks.map((s: any) => (
             <motion.a
-              key={s.label || s.url}
+              key={s.label || s.url || s.channel}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               href={s.url || "#"}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={s.label || "Social"}
+              aria-label={s.label || s.channel || "Social"}
             >
               {s.label === "Facebook" && (
                 <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -483,9 +468,9 @@ export function SiteFooter() {
       </div>
 
       <div className="footer-right">
-        <Image className="footer-photo" src={A + "/light/raw-05.png"} width={710} height={390} alt="Agrani technology consultation" loading="eager" />
-        <h3>{settings?.footer?.newsletter?.title || "Newsletter"}</h3>
-        <p>{settings?.footer?.newsletter?.description || "Stay Updated with latest news and offers!"}</p>
+        {footerImage && <Image className="footer-photo" src={footerImage} width={710} height={390} alt={settings?.branding?.footer_image?.alt_text || ""} loading="eager" unoptimized={footerImage.startsWith("http")} />}
+        {settings?.footer?.newsletter?.title && <h3>{settings.footer.newsletter.title}</h3>}
+        {settings?.footer?.newsletter?.description && <p>{settings.footer.newsletter.description}</p>}
         <form className="newsletter" onSubmit={handleSubscribe}>
           <input
             type="email"
@@ -511,8 +496,8 @@ export function SiteFooter() {
         )}
         <div className="social-links">
           {socialLinks.map((s: any) => (
-            <a key={s.label || s.url} href={s.url || "#"} target="_blank" rel="noopener noreferrer">
-              {s.label || "Social"} ↗
+            <a key={s.label || s.url || s.channel} href={s.url || "#"} target="_blank" rel="noopener noreferrer">
+              {s.label || s.channel} ↗
             </a>
           ))}
         </div>
@@ -531,9 +516,9 @@ export function SiteFooter() {
         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} aria-label="Chat with us">
           <Image src={A + "/light/raw-08.png"} width={36} height={36} alt="" />
         </motion.button>
-        <motion.a whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} href={`tel:${phone}`} aria-label="Call us">
+        {phone && <motion.a whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} href={`tel:${phone}`} aria-label="Call us">
           <Image src={A + "/light/raw-07.png"} width={36} height={36} alt="" />
-        </motion.a>
+        </motion.a>}
       </div>
     </footer>
   );
@@ -543,10 +528,14 @@ export function ThemePage({
   children,
   active,
   includeContact = true,
+  quote,
+  siteSettings,
 }: {
   children: React.ReactNode;
   active?: string;
   includeContact?: boolean;
+  quote?: QuoteContent;
+  siteSettings?: SiteSettings;
 }) {
   const { dark, toggleTheme } = useTheme("dark");
   const pathname = usePathname();
@@ -555,8 +544,8 @@ export function ThemePage({
     <main className={(dark ? "site dark" : "site light") + " inner-site " + routeClass}>
       <SiteHeader dark={dark} toggleTheme={toggleTheme} active={active} />
       {children}
-      {includeContact && <ContactBlock />}
-      <SiteFooter />
+      {includeContact && <ContactBlock quote={quote} />}
+      <SiteFooter settings={siteSettings} />
     </main>
   );
 }

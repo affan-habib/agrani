@@ -30,7 +30,18 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       <div className="admin-modal" style={{ maxWidth: 460 }}>
         <div className="admin-modal-header">
           <h3 className="admin-card-title">{title}</h3>
-          <button onClick={onCancel} style={{ color: "#8b9baa", fontSize: "1.1rem" }}>✕</button>
+          <button
+            onClick={onCancel}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--admin-text-muted)",
+              fontSize: "1.1rem",
+              cursor: "pointer",
+            }}
+          >
+            ✕
+          </button>
         </div>
         <div className="admin-modal-body">
           <p style={{ color: "var(--admin-text-muted)", fontSize: "0.9rem", lineHeight: 1.5 }}>

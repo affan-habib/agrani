@@ -71,7 +71,18 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
             <h3 className="admin-card-title">Media Library</h3>
             <p className="admin-card-desc">Select an existing asset or upload a new one</p>
           </div>
-          <button onClick={onClose} style={{ color: "#8b9baa", fontSize: "1.2rem" }}>✕</button>
+          <button
+            onClick={onClose}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--admin-text-muted)",
+              fontSize: "1.2rem",
+              cursor: "pointer",
+            }}
+          >
+            ✕
+          </button>
         </div>
 
         <div style={{ padding: "0.75rem 1.5rem", borderBottom: "1px solid var(--admin-border)", display: "flex", gap: "1rem", alignItems: "center" }}>
@@ -109,7 +120,7 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
                     {item.mime_type.startsWith("image") ? (
                       <img src={item.url} alt={item.alt_text || item.file_name} className="admin-media-preview" />
                     ) : (
-                      <div style={{ height: 90, display: "flex", alignItems: "center", justifyContent: "center", background: "#0d141b", color: "#8b9baa", fontSize: "0.8rem" }}>
+                      <div style={{ height: 90, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--admin-surface)", color: "var(--admin-text-muted)", fontSize: "0.8rem" }}>
                         📄 {item.file_name.split(".").pop()?.toUpperCase()}
                       </div>
                     )}

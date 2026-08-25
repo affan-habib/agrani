@@ -1,12 +1,16 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://192.168.30.27:8000/api/v1";
-export const FRONTEND_TOKEN = process.env.NEXT_PUBLIC_FRONTEND_API_TOKEN || "agrani_frontend_api_token_2024";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+export const FRONTEND_TOKEN = process.env.NEXT_PUBLIC_FRONTEND_API_TOKEN;
 
 export interface PublicFetchOptions extends RequestInit {
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
   isMultipart?: boolean;
 }
 
 export async function publicFetch<T>(endpoint: string, options: PublicFetchOptions = {}): Promise<T> {
+  if (!API_BASE_URL) {
+    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
+  }
+
   const { params, isMultipart, headers: customHeaders, ...init } = options;
 
   let url = endpoint.startsWith("http") ? endpoint : `${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
@@ -37,6 +41,7 @@ export async function publicFetch<T>(endpoint: string, options: PublicFetchOptio
 
   try {
     const response = await fetch(url, {
+      cache: init.method && init.method !== "GET" ? init.cache : (init.cache ?? "no-store"),
       ...init,
       headers,
     });
@@ -45,7 +50,7 @@ export async function publicFetch<T>(endpoint: string, options: PublicFetchOptio
       return {} as T;
     }
 
-    let data: any = null;
+    let data: unknown = null;
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
       data = await response.json().catch(() => null);
@@ -54,14 +59,16 @@ export async function publicFetch<T>(endpoint: string, options: PublicFetchOptio
     }
 
     if (!response.ok) {
-      const message = data?.error?.message || response.statusText || "Public API request failed";
+      const payload = data && typeof data === "object" ? data as { error?: { message?: string } } : null;
+      const message = payload?.error?.message || response.statusText || "Public API request failed";
       console.warn(`[Public API] ${init.method || "GET"} ${url} returned ${response.status}:`, message);
       throw new Error(message);
     }
 
     return data as T;
-  } catch (err: any) {
-    console.warn(`[Public API Error] ${init.method || "GET"} ${url}:`, err.message);
-    throw err;
+  } catch (reason) {
+    const error = reason instanceof Error ? reason : new Error("Public API request failed");
+    console.warn(`[Public API Error] ${init.method || "GET"} ${url}:`, error.message);
+    throw error;
   }
 }

@@ -61,14 +61,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={toast.id}
             onClick={() => removeToast(toast.id)}
             style={{
-              background: "#121c24",
+              background: "var(--admin-surface)",
               border: `1px solid ${getBgColor(toast.type)}`,
               borderLeft: `4px solid ${getBgColor(toast.type)}`,
-              color: "#f3f6f8",
+              color: "var(--admin-text-main)",
               padding: "0.75rem 1rem",
-              borderRadius: "8px",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+              borderRadius: "10px",
+              boxShadow: "var(--admin-shadow-lg)",
               fontSize: "0.875rem",
+              fontWeight: 500,
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -78,7 +79,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             }}
           >
             <span>{toast.message}</span>
-            <span style={{ color: "#8b9baa", fontSize: "0.75rem" }}>✕</span>
+            <span style={{ color: "var(--admin-text-muted)", fontSize: "0.75rem" }}>✕</span>
           </div>
         ))}
       </div>

@@ -4983,3 +4983,67 @@ textarea:focus {
     transition-duration: 0.01ms !important;
   }
 }
+/* API states deliberately replace the old hardcoded business-content fallbacks. */
+.api-empty-state {
+  width: 100%;
+  min-height: 140px;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  border: 1px dashed color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 18px;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+  text-align: center;
+}
+
+.api-media-unavailable {
+  width: 100%;
+  min-height: 180px;
+  border-radius: inherit;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.job-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgb(0 0 0 / 75%);
+  backdrop-filter: blur(6px);
+}
+
+.job-modal {
+  position: relative;
+  width: min(100%, 520px);
+  padding: 2rem;
+  border: 1px solid #31414d;
+  border-radius: 16px;
+  background: #121c24;
+  color: #f3f6f8;
+}
+
+.job-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.job-modal form,
+.job-modal label {
+  display: grid;
+  gap: .35rem;
+}
+
+.job-modal form { gap: 1rem; margin-top: 1rem; }
+.job-modal input,
+.job-modal textarea { width: 100%; padding: .7rem; border: 1px solid #31414d; border-radius: 8px; background: #0d141b; color: inherit; }
+.job-modal-actions { display: flex; gap: .75rem; }
+.job-modal-actions button { padding: .7rem 1rem; border-radius: 999px; cursor: pointer; }
+.form-success { margin-top: 1rem; color: #10b981; }
+.form-error { color: #ef4444; }

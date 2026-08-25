@@ -70,6 +70,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.warn("Logout error:", err);
     } finally {
+      removeAdminToken();
       setUser(null);
       setTokenState(null);
       setIsLoading(false);

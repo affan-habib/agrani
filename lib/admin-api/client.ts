@@ -12,11 +12,15 @@ export function getAdminToken(): string | null {
 export function setAdminToken(token: string): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(TOKEN_KEY, token);
+  // Store in cookie for middleware server-side route protection
+  document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=604800; SameSite=Lax`;
 }
 
 export function removeAdminToken(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
+  // Expire cookie
+  document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
 }
 
 export class AdminApiError extends Error {

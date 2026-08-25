@@ -1,6 +1,8 @@
-import { ExpertisePage } from "@/components/pages/inner-pages";
 import { ThemePage } from "@/components/site-chrome";
+import { publicApi } from "@/lib/public-api/services";
+import { ExpertiseContent } from "./expertise-content";
 
-export default function ExpertiseRoute() {
-  return <ThemePage active="Others"><ExpertisePage /></ThemePage>;
+export default async function ExpertiseRoute() {
+  const data = await publicApi.getExpertise();
+  return <ThemePage active="Others" quote={data.quote} siteSettings={data.site_settings}><ExpertiseContent data={data} /></ThemePage>;
 }

@@ -6,6 +6,16 @@ import { adminFetch } from "@/lib/admin-api/client";
 import { jobApplicationsApi, quoteRequestsApi, newsletterSubscribersApi } from "@/lib/admin-api/submissions";
 import { blogPostsApi, careerJobsApi } from "@/lib/admin-api/resources";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import {
+  DollarSign,
+  Inbox,
+  Send,
+  FileText,
+  Users,
+  ArrowUpRight,
+  Activity,
+  FileSpreadsheet,
+} from "lucide-react";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
@@ -59,51 +69,58 @@ export default function AdminDashboardPage() {
   }, []);
 
   const statCards = [
-    { label: "Quote Requests", value: stats.quoteRequests, href: "/admin/inquiries/quotes", icon: "💰", color: "var(--admin-accent)" },
-    { label: "Job Applications", value: stats.jobApplications, href: "/admin/inquiries/applications", icon: "📥", color: "#10b981" },
-    { label: "Subscribers", value: stats.newsletterSubscribers, href: "/admin/inquiries/subscribers", icon: "📬", color: "#3b82f6" },
-    { label: "Blog Posts", value: stats.blogPosts, href: "/admin/blog", icon: "📝", color: "#8b5cf6" },
-    { label: "Job Openings", value: stats.activeJobs, href: "/admin/careers", icon: "👥", color: "#f59e0b" },
+    { label: "Quote Requests", value: stats.quoteRequests, href: "/admin/inquiries/quotes", icon: DollarSign, color: "var(--admin-accent)" },
+    { label: "Job Applications", value: stats.jobApplications, href: "/admin/inquiries/applications", icon: Inbox, color: "#10b981" },
+    { label: "Subscribers", value: stats.newsletterSubscribers, href: "/admin/inquiries/subscribers", icon: Send, color: "#3b82f6" },
+    { label: "Blog Posts", value: stats.blogPosts, href: "/admin/blog", icon: FileText, color: "#8b5cf6" },
+    { label: "Job Openings", value: stats.activeJobs, href: "/admin/careers", icon: Users, color: "#f59e0b" },
   ];
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--admin-text-main)" }}>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--admin-text-main)", letterSpacing: "-0.02em" }}>
             Overview Dashboard
           </h1>
           <p style={{ color: "var(--admin-text-muted)", fontSize: "0.875rem", marginTop: "0.25rem" }}>
-            Real-time status of Agrani content, services, and client inquiries
+            Real-time performance metrics and client interactions
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "var(--admin-surface)", border: "1px solid var(--admin-border)", padding: "0.4rem 0.85rem", borderRadius: 8, fontSize: "0.8rem" }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "var(--admin-surface)", border: "1px solid var(--admin-border)", padding: "0.45rem 0.9rem", borderRadius: 10, fontSize: "0.8rem" }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b981" }} />
           <span style={{ color: "var(--admin-text-muted)" }}>API Backend:</span>
           <span style={{ fontWeight: 600, color: "var(--admin-text-main)" }}>{health}</span>
         </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
-        {statCards.map((card, idx) => (
-          <Link
-            key={idx}
-            href={card.href}
-            className="admin-card"
-            style={{ textDecoration: "none", marginBottom: 0, transition: "transform 0.15s, border-color 0.15s" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-              <span style={{ fontSize: "1.5rem" }}>{card.icon}</span>
-              <span style={{ fontSize: "0.75rem", color: "var(--admin-text-muted)" }}>Manage ↗</span>
-            </div>
-            <div style={{ fontSize: "2rem", fontWeight: 700, color: card.color, marginBottom: "0.2rem" }}>
-              {loading ? "..." : card.value}
-            </div>
-            <div style={{ fontSize: "0.825rem", color: "var(--admin-text-muted)", fontWeight: 500 }}>
-              {card.label}
-            </div>
-          </Link>
-        ))}
+        {statCards.map((card, idx) => {
+          const IconComp = card.icon;
+          return (
+            <Link
+              key={idx}
+              href={card.href}
+              className="admin-card"
+              style={{ textDecoration: "none", marginBottom: 0, padding: "1.25rem" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.85rem" }}>
+                <div style={{ width: 38, height: 38, borderRadius: 9, background: `${card.color}18`, display: "flex", alignItems: "center", justifyContent: "center", color: card.color }}>
+                  <IconComp size={19} />
+                </div>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 2, fontSize: "0.75rem", color: "var(--admin-text-muted)" }}>
+                  Manage <ArrowUpRight size={13} />
+                </span>
+              </div>
+              <div style={{ fontSize: "2rem", fontWeight: 700, color: card.color, marginBottom: "0.2rem", letterSpacing: "-0.02em" }}>
+                {loading ? "..." : card.value}
+              </div>
+              <div style={{ fontSize: "0.825rem", color: "var(--admin-text-muted)", fontWeight: 500 }}>
+                {card.label}
+              </div>
+            </Link>
+          );
+        })}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))", gap: "1.5rem" }}>
@@ -118,16 +135,16 @@ export default function AdminDashboardPage() {
             </Link>
           </div>
           {loading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "var(--admin-text-muted)" }}>Loading quotes...</div>
+            <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-text-muted)" }}>Loading quotes...</div>
           ) : recentQuotes.length === 0 ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "var(--admin-text-muted)" }}>No quote requests yet.</div>
+            <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-text-muted)" }}>No quote requests yet.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               {recentQuotes.map((q) => (
-                <div key={q.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem", background: "var(--admin-sidebar-bg)", borderRadius: 8, border: "1px solid var(--admin-border)" }}>
+                <div key={q.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1rem", background: "var(--admin-sidebar-bg)", borderRadius: 10, border: "1px solid var(--admin-border)" }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--admin-text-main)" }}>{q.name}</div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--admin-text-muted)" }}>{q.service_type || "General Inquiry"} • {q.email}</div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--admin-text-muted)", marginTop: "2px" }}>{q.service_type || "General Inquiry"} • {q.email}</div>
                   </div>
                   <StatusBadge status={q.status || "pending"} />
                 </div>
@@ -147,16 +164,16 @@ export default function AdminDashboardPage() {
             </Link>
           </div>
           {loading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "var(--admin-text-muted)" }}>Loading applications...</div>
+            <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-text-muted)" }}>Loading applications...</div>
           ) : recentApps.length === 0 ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "var(--admin-text-muted)" }}>No job applications yet.</div>
+            <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-text-muted)" }}>No job applications yet.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               {recentApps.map((a) => (
-                <div key={a.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem", background: "var(--admin-sidebar-bg)", borderRadius: 8, border: "1px solid var(--admin-border)" }}>
+                <div key={a.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1rem", background: "var(--admin-sidebar-bg)", borderRadius: 10, border: "1px solid var(--admin-border)" }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--admin-text-main)" }}>{a.applicant_name}</div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--admin-text-muted)" }}>{a.job?.title || "Position"} • {a.email}</div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--admin-text-muted)", marginTop: "2px" }}>{a.job?.title || "Position"} • {a.email}</div>
                   </div>
                   <StatusBadge status={a.status || "pending"} />
                 </div>
@@ -168,3 +185,4 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+

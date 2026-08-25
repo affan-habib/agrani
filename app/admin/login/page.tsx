@@ -36,6 +36,7 @@ export default function AdminLoginPage() {
 
   return (
     <div
+      className="admin-root theme-dark"
       style={{
         minHeight: "100vh",
         background: "radial-gradient(circle at top center, #192631 0%, #090e13 70%)",

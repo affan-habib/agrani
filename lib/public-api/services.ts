@@ -1,31 +1,24 @@
 import { publicFetch } from "./client";
-import {
+import type {
+  AboutPageData,
   ApiResponse,
-  ApiPaginatedResponse,
-  PublicHomePageResource,
-  HomePageResource,
-  AboutPageResource,
-  ProductServicesPageResource,
-  ExpertisePageResource,
-  CustomerExperiencePageResource,
-  CaseStudiesPageResource,
-  ContactPageResource,
-  CareerPageResource,
-  BlogPageResource,
-  AdminSiteSettingsResource,
-  BlogPostResource,
-  BlogCategoryResource,
-  CareerJobResource,
-  DepartmentResource,
-  CaseStudyResource,
-  CaseStudyTagResource,
-  ServiceResource,
-  SectorResource,
-  TestimonialResource,
-  WhyChooseUsItemResource,
-  QuoteRequestResource,
-  JobApplicationResource,
-} from "@/types/admin";
+  BlogCategory,
+  BlogPost,
+  CareerJob,
+  CareerPageData,
+  CaseStudy,
+  ContactPageData,
+  CustomerExperiencePageData,
+  ExpertisePageData,
+  HomePageData,
+  ListingPageContent,
+  PaginatedResponse,
+  ProductServicesPageData,
+  SectorSummary,
+  ServiceSummary,
+  Testimonial,
+  WhyChooseItem,
+} from "@/types/public";
 
 export interface SubmitQuotePayload {
   first_name?: string;
@@ -35,13 +28,8 @@ export interface SubmitQuotePayload {
   phone: string;
   city?: string;
   message?: string;
-  company?: string;
-  service_type?: string;
-  budget_range?: string;
-  timeline?: string;
   project_details?: string;
   source_page?: string;
-  [key: string]: any;
 }
 
 export interface SubscribeNewsletterPayload {
@@ -50,71 +38,72 @@ export interface SubscribeNewsletterPayload {
   last_name?: string;
 }
 
+const data = <T>(response: ApiResponse<T>) => response.data;
+
 export const publicApi = {
-  // Page Singletons
-  getHome: () => publicFetch<ApiResponse<PublicHomePageResource>>("/home").then(r => r.data),
-  getAbout: () => publicFetch<ApiResponse<AboutPageResource>>("/about").then(r => r.data),
-  getProductServices: () => publicFetch<ApiResponse<ProductServicesPageResource>>("/product-services").then(r => r.data),
-  getExpertise: () => publicFetch<ApiResponse<ExpertisePageResource>>("/expertise").then(r => r.data),
-  getCustomerExperience: () => publicFetch<ApiResponse<CustomerExperiencePageResource>>("/customer-experience").then(r => r.data),
-  getCareersPage: () => publicFetch<ApiResponse<CareerPageResource>>("/careers").then(r => r.data),
-  getContactPage: () => publicFetch<ApiResponse<ContactPageResource>>("/contact").then(r => r.data),
-  getSiteSettings: () => publicFetch<ApiResponse<AdminSiteSettingsResource>>("/admin/site-settings").then(r => r.data),
+  getHome: () => publicFetch<ApiResponse<HomePageData>>("/home").then(data),
+  getAbout: () => publicFetch<ApiResponse<AboutPageData>>("/about").then(data),
+  getProductServices: () => publicFetch<ApiResponse<ProductServicesPageData>>("/product-services").then(data),
+  getExpertise: () => publicFetch<ApiResponse<ExpertisePageData>>("/expertise").then(data),
+  getCustomerExperience: () => publicFetch<ApiResponse<CustomerExperiencePageData>>("/customer-experience").then(data),
+  getCareersPage: () => publicFetch<ApiResponse<CareerPageData>>("/careers").then(data),
+  getContactPage: () => publicFetch<ApiResponse<ContactPageData>>("/contact").then(data),
 
-  // Collections
-  getServices: (params?: Record<string, any>) => publicFetch<ApiResponse<ServiceResource[]>>("/services", { params }).then(r => r.data),
-  getServiceBySlug: (slug: string) => publicFetch<ApiResponse<ServiceResource>>(`/services/${slug}`).then(r => r.data),
-  
-  getSectors: (params?: Record<string, any>) => publicFetch<ApiResponse<SectorResource[]>>("/sectors", { params }).then(r => r.data),
-  getSectorBySlug: (slug: string) => publicFetch<ApiResponse<SectorResource>>(`/sectors/${slug}`).then(r => r.data),
+  getServices: (params?: Record<string, unknown>) =>
+    publicFetch<PaginatedResponse<ServiceSummary>>("/services", { params }).then(data),
+  getServiceBySlug: (slug: string) =>
+    publicFetch<ApiResponse<ServiceSummary>>(`/services/${slug}`).then(data),
+  getSectors: (params?: Record<string, unknown>) =>
+    publicFetch<PaginatedResponse<SectorSummary>>("/sectors", { params }).then(data),
+  getTestimonials: (params?: Record<string, unknown>) =>
+    publicFetch<PaginatedResponse<Testimonial>>("/testimonials", { params }).then(data),
+  getWhyChooseUs: (params?: Record<string, unknown>) =>
+    publicFetch<ApiResponse<WhyChooseItem[]>>("/why-choose-us", { params }).then(data),
 
-  getTestimonials: (params?: Record<string, any>) => publicFetch<ApiResponse<TestimonialResource[]>>("/testimonials", { params }).then(r => r.data),
-  getWhyChooseUs: (params?: Record<string, any>) => publicFetch<ApiResponse<WhyChooseUsItemResource[]>>("/why-choose-us", { params }).then(r => r.data),
-
-  // Careers & Jobs
-  getJobs: (params?: Record<string, any>) => publicFetch<ApiResponse<CareerJobResource[]>>("/careers/jobs", { params }).then(r => r.data),
-  getJobBySlug: (slug: string) => publicFetch<ApiResponse<CareerJobResource>>(`/careers/jobs/${slug}`).then(r => r.data),
-  applyForJob: (jobIdOrSlug: string | number, formData: FormData) => {
-    return publicFetch<ApiResponse<JobApplicationResource>>(`/careers/jobs/${jobIdOrSlug}/apply`, {
+  getJobs: (params?: Record<string, unknown>) =>
+    publicFetch<PaginatedResponse<CareerJob>>("/careers/jobs", { params }).then(data),
+  getJobBySlug: (slug: string) =>
+    publicFetch<ApiResponse<CareerJob>>(`/careers/jobs/${slug}`).then(data),
+  applyForJob: (jobIdOrSlug: string | number, formData: FormData) =>
+    publicFetch<ApiResponse<unknown>>(`/careers/jobs/${jobIdOrSlug}/apply`, {
       method: "POST",
       body: formData,
       isMultipart: true,
-    }).then(r => r.data);
-  },
+    }).then(data),
 
-  // Blog
-  getBlogPosts: (params?: Record<string, any>) => publicFetch<ApiPaginatedResponse<BlogPostResource>>("/blog", { params }),
-  getBlogCategories: () => publicFetch<ApiResponse<BlogCategoryResource[]>>("/blog/categories").then(r => r.data),
-  getBlogPostBySlug: (slug: string) => publicFetch<ApiResponse<BlogPostResource>>(`/blog/${slug}`).then(r => r.data),
+  getBlogPosts: (params?: Record<string, unknown>) =>
+    publicFetch<PaginatedResponse<BlogPost, ListingPageContent>>("/blog", { params }),
+  getBlogCategories: () =>
+    publicFetch<ApiResponse<BlogCategory[]>>("/blog/categories").then(data),
+  getBlogPostBySlug: (slug: string) =>
+    publicFetch<ApiResponse<BlogPost>>(`/blog/${encodeURIComponent(slug)}`).then(data),
 
-  // Case Studies
-  getCaseStudies: (params?: Record<string, any>) => publicFetch<ApiResponse<CaseStudyResource[]>>("/case-studies", { params }).then(r => r.data),
-  getCaseStudyBySlug: (slug: string) => publicFetch<ApiResponse<CaseStudyResource>>(`/case-studies/${slug}`).then(r => r.data),
-  getCaseStudyTags: () => publicFetch<ApiResponse<CaseStudyTagResource[]>>("/case-study-tags").then(r => r.data),
+  getCaseStudies: (params?: Record<string, unknown>) =>
+    publicFetch<PaginatedResponse<CaseStudy, ListingPageContent>>("/case-studies", { params }),
+  getCaseStudyBySlug: (slug: string) =>
+    publicFetch<ApiResponse<CaseStudy>>(`/case-studies/${encodeURIComponent(slug)}`).then(data),
 
-  // Form Submissions
   submitQuoteRequest: (payload: SubmitQuotePayload) => {
-    const parts = (payload.name || "").trim().split(" ");
-    const firstName = payload.first_name || parts[0] || "Valued";
-    const lastName = payload.last_name || (parts.length > 1 ? parts.slice(1).join(" ") : "Client");
+    const nameParts = (payload.name || "").trim().split(/\s+/).filter(Boolean);
     const body = {
-      first_name: firstName,
-      last_name: lastName,
-      phone: payload.phone || "+8801700000000",
-      message: payload.message || payload.project_details || "Inquiry from website",
-      source_page: payload.source_page || "Website",
+      first_name: payload.first_name || nameParts[0],
+      last_name: payload.last_name || nameParts.slice(1).join(" "),
+      phone: payload.phone,
+      message: payload.message || payload.project_details,
+      source_page: payload.source_page,
       email: payload.email,
       city: payload.city,
     };
-    return publicFetch<ApiResponse<QuoteRequestResource>>("/quote-requests", {
+
+    return publicFetch<ApiResponse<unknown>>("/quote-requests", {
       method: "POST",
       body: JSON.stringify(body),
-    }).then(r => r.data);
+    }).then(data);
   },
-  subscribeNewsletter: (payload: SubscribeNewsletterPayload) => {
-    return publicFetch<ApiResponse<{ message: string }>>("/newsletter/subscribe", {
+
+  subscribeNewsletter: (payload: SubscribeNewsletterPayload) =>
+    publicFetch<ApiResponse<{ message: string }>>("/newsletter/subscribe", {
       method: "POST",
       body: JSON.stringify(payload),
-    }).then(r => r.data);
-  },
+    }).then(data),
 };
