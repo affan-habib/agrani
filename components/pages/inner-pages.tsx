@@ -354,7 +354,24 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
 
 export function CatalogPage({ products = false }: { products?: boolean }) {
   const [open, setOpen] = useState<number | null>(0);
-  const services = products
+  const [catalogData, setCatalogData] = useState<any>(null);
+  const [liveServices, setLiveServices] = useState<any[]>([]);
+
+  useEffect(() => {
+    publicApi.getProductServices()
+      .then((data) => setCatalogData(data))
+      .catch((err) => console.warn("Using fallback products-services data:", err.message));
+
+    publicApi.getServices()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setLiveServices(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const fallbackServiceTitles = products
     ? ["Portfolio", "Industries Served"]
     : [
         "Software Development",
@@ -369,6 +386,11 @@ export function CatalogPage({ products = false }: { products?: boolean }) {
         "IT Training",
         "Offshore IT Services",
       ];
+
+  const serviceNames = (liveServices.length > 0 && !products)
+    ? liveServices.map(s => s.title)
+    : fallbackServiceTitles;
+
   const details = products
     ? [
         "Revenue & Fees Collection System",
@@ -394,7 +416,11 @@ export function CatalogPage({ products = false }: { products?: boolean }) {
 
   return (
     <>
-      <PageIntro label="Product and Services" title="Real-World Products" copy={pageCopy} />
+      <PageIntro
+        label="Product and Services"
+        title={catalogData?.page?.title || (products ? "Real-World Products" : "Real-World Services")}
+        copy={catalogData?.page?.description || pageCopy}
+      />
       <section className="catalog container">
         <div className="tab-row">
           <Link className={!products ? "active" : ""} href="/services">Services</Link>
@@ -405,8 +431,13 @@ export function CatalogPage({ products = false }: { products?: boolean }) {
         </p>
 
         <div className="catalog-list">
-          {services.map((item, i) => {
+          {serviceNames.map((item, i) => {
             const isOpen = open === i;
+            const liveService = liveServices[i];
+            const tags = (liveService && liveService.features && Array.isArray(liveService.features) && liveService.features.length > 0)
+              ? liveService.features
+              : details;
+
             return (
               <motion.article
                 initial={{ opacity: 0, y: 15 }}
@@ -414,10 +445,10 @@ export function CatalogPage({ products = false }: { products?: boolean }) {
                 viewport={{ once: true }}
                 transition={{ duration: 0.35, delay: i * 0.04 }}
                 className={isOpen ? "open" : ""}
-                key={item}
+                key={item + i}
               >
                 <button onClick={() => setOpen(isOpen ? null : i)}>
-                  <span>{String.fromCharCode(65 + i)}</span>
+                  <span>{String.fromCharCode(65 + (i % 26))}</span>
                   <strong>{item}</strong>
                   <span className="accordion-indicator">{isOpen ? "−" : "+"}</span>
                 </button>
@@ -431,7 +462,7 @@ export function CatalogPage({ products = false }: { products?: boolean }) {
                       className="catalog-details"
                     >
                       <div className="details-tags">
-                        {details.map((x) => (
+                        {tags.map((x: string) => (
                           <span key={x}>◉ {x}</span>
                         ))}
                       </div>
