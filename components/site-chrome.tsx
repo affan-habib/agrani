@@ -381,6 +381,15 @@ export function SiteFooter() {
   const [email, setEmail] = useState("");
   const [subscribing, setSubscribing] = useState(false);
   const [subscribeStatus, setSubscribeStatus] = useState<string | null>(null);
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    publicApi.getContactPage()
+      .then((data: any) => {
+        if (data?.site_settings) setSettings(data.site_settings);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -398,13 +407,31 @@ export function SiteFooter() {
     }
   };
 
+  const contact = settings?.contact;
+  const company = settings?.company;
+  const socialLinks = settings?.social?.links || [
+    { label: "Facebook", url: "https://facebook.com" },
+    { label: "Twitter", url: "https://twitter.com" },
+    { label: "LinkedIn", url: "https://linkedin.com" },
+  ];
+
+  const addressLine = contact?.address?.line_1
+    ? `${contact.address.line_1}, ${contact.address.city || ""}-${contact.address.postal_code || ""}, ${contact.address.country || "Bangladesh"}`
+    : "Plot-174/176, Road-02, Avenue-01, Mirpur DOHS, Dhaka-1216, Bangladesh";
+
+  const phone = contact?.primary_phone || "+880-9610944449";
+  const emailAddr = contact?.primary_email || "info@agranitechbd.com";
+  const websiteUrl = company?.website_url || "https://www.agranitechbd.com";
+  const hours = contact?.business_hours || "Mon-Fri 9am-6pm";
+  const copyrightText = settings?.footer?.copyright || "Copyright © 2026 Agrani Technologies. All rights reserved.";
+
   return (
     <footer className="footer container" id="footer">
       <div className="footer-left">
         <Link href="/" aria-label="Agrani home">
           <Image className="footer-logo" src={A + "/icons/logo-footer.svg"} width={205} height={57} alt="Agrani Technologies & Services Limited" loading="eager" />
         </Link>
-        <p>Agrani Technology is the highest rated Software<br />solution expert team in the world.</p>
+        <p>{settings?.footer?.description || "Agrani Technology is the highest rated Software solution expert team in the world."}</p>
         
         <h3>Navigations</h3>
         <div className="footer-nav">
@@ -419,32 +446,46 @@ export function SiteFooter() {
         </div>
 
         <h3>Our Location</h3>
-        <address>Plot-174/176, Road-02, Avenue-01, Mirpur DOHS,<br />Dhaka-1216, Bangladesh</address>
-        <a className="underlined" href="https://www.agranitechbd.com" target="_blank" rel="noopener noreferrer">www.agranitechbd.com</a>
+        <address>{addressLine}</address>
+        <a className="underlined" href={websiteUrl} target="_blank" rel="noopener noreferrer">
+          {websiteUrl.replace(/^https?:\/\//, "")}
+        </a>
         
         <div className="contact-line">
-          <a href="tel:+8809610944449">+880-9610944449</a>
-          <a href="mailto:info@agranitechbd.com">info@agranitechbd.com</a>
+          <a href={`tel:${phone}`}>{phone}</a>
+          <a href={`mailto:${emailAddr}`}>{emailAddr}</a>
         </div>
-        <p>Mon-Fri 9am-6pm</p>
+        <p>{hours}</p>
         
         <div className="social-dots">
-          <motion.a whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          </motion.a>
-          <motion.a whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          </motion.a>
-          <motion.a whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-          </motion.a>
+          {socialLinks.map((s: any) => (
+            <motion.a
+              key={s.label || s.url}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              href={s.url || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={s.label || "Social"}
+            >
+              {s.label === "Facebook" && (
+                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              )}
+              {s.label === "Twitter" && (
+                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              )}
+              {s.label !== "Facebook" && s.label !== "Twitter" && (
+                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              )}
+            </motion.a>
+          ))}
         </div>
       </div>
 
       <div className="footer-right">
         <Image className="footer-photo" src={A + "/light/raw-05.png"} width={710} height={390} alt="Agrani technology consultation" loading="eager" />
-        <h3>Newsletter</h3>
-        <p>Stay Updated with latest news and offers!</p>
+        <h3>{settings?.footer?.newsletter?.title || "Newsletter"}</h3>
+        <p>{settings?.footer?.newsletter?.description || "Stay Updated with latest news and offers!"}</p>
         <form className="newsletter" onSubmit={handleSubscribe}>
           <input
             type="email"
@@ -469,14 +510,16 @@ export function SiteFooter() {
           </p>
         )}
         <div className="social-links">
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook ↗</a>
-          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">Twitter ↗</a>
-          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+          {socialLinks.map((s: any) => (
+            <a key={s.label || s.url} href={s.url || "#"} target="_blank" rel="noopener noreferrer">
+              {s.label || "Social"} ↗
+            </a>
+          ))}
         </div>
       </div>
 
       <div className="footer-bottom">
-        <span>Copyright © 2026 Agrani Technologies. All rights reserved.</span>
+        <span>{copyrightText}</span>
         <nav aria-label="Footer legal links">
           <Link href="/terms">Refund Policy</Link>
           <Link href="/terms">Terms &amp; Conditions</Link>
@@ -488,7 +531,7 @@ export function SiteFooter() {
         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} aria-label="Chat with us">
           <Image src={A + "/light/raw-08.png"} width={36} height={36} alt="" />
         </motion.button>
-        <motion.a whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} href="tel:+8809610944449" aria-label="Call us">
+        <motion.a whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} href={`tel:${phone}`} aria-label="Call us">
           <Image src={A + "/light/raw-07.png"} width={36} height={36} alt="" />
         </motion.a>
       </div>

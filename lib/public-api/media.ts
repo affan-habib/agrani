@@ -2,10 +2,13 @@ const BACKEND_STORAGE_ORIGIN = process.env.NEXT_PUBLIC_API_BASE_URL
   ? process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/api\/v1\/?$/, "")
   : "http://192.168.30.27:8000";
 
-export function resolveMediaUrl(mediaOrUrl?: string | { url?: string } | null, fallback: string = ""): string {
+export function resolveMediaUrl(mediaOrUrl?: any, fallback: string = ""): string {
   if (!mediaOrUrl) return fallback;
   
   let urlStr = typeof mediaOrUrl === "string" ? mediaOrUrl : mediaOrUrl.url;
+  if (!urlStr && typeof mediaOrUrl === "object") {
+    urlStr = mediaOrUrl.path || mediaOrUrl.file_path || mediaOrUrl.src || mediaOrUrl.original_url || mediaOrUrl.full_url;
+  }
   if (!urlStr) return fallback;
 
   // If backend returned a 1x1 placeholder seeder image, prefer high-res Figma design fallback

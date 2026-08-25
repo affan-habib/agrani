@@ -64,32 +64,54 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
     router.push(`/about?tab=${nextTab}`, { scroll: false });
   };
 
-  const directors = [
-    {
-      name: aboutData?.director_message?.director?.full_name || "Kamrul Islam",
-      role: aboutData?.director_message?.director?.designation || "Managing Director (25+ yrs experience)",
-      title: aboutData?.director_message?.title || "A word from the Director",
-      bio: aboutData?.director_message?.message || aboutData?.director_message?.director?.full_bio || "Kamrul Islam is the Managing Director of Agrani Technologies and Services Limited, bringing over 25 years of extensive experience in the IT sector both in Bangladesh and internationally. Under his leadership, the company continues to grow as a trusted name in delivering innovative technology solutions. His deep industry knowledge and strategic vision have been instrumental in driving the organization’s success and commitment to excellence.",
-      image: resolveMediaUrl(aboutData?.director_message?.director?.profile_media, `${A}/about/director-kamrul.png`),
-      align: "right", // image on right
-    },
-    {
-      name: "Tanvir Mosaddaque",
-      role: "Executive Director (25+ yrs experience)",
-      title: "",
-      bio: "Tanvir Mosaddaque serves as the Executive Director of Agrani Technologies and Services Limited. With over 25+ years of leadership in IT infrastructure, enterprise systems, and strategic delivery, he plays a key role in driving Agrani's technological growth and expanding our services footprint across Bangladesh and beyond.",
-      image: `${A}/about/02.jpeg`,
-      align: "left", // image on left
-    },
-    {
-      name: "Hasan Shahid Sarwar, FCA",
-      role: "Director (Finance & Operations)",
-      title: "",
-      bio: "Hasan Shahid Sarwar, FCA brings extensive financial expertise, corporate governance, and operational excellence to Agrani Technologies. As Director of Finance & Operations, he oversees fiscal planning, compliance, and institutional sustainability, ensuring Agrani delivers dependable value to all clients and stakeholders.",
-      image: `${A}/about/director-hasan.png`,
-      align: "right", // image on right
-    },
-  ];
+  const apiLeadership = Array.isArray(aboutData?.leadership) ? aboutData.leadership : [];
+  
+  const leadDirector = aboutData?.director_message?.director ? [{
+    name: aboutData.director_message.director.full_name || "Kamrul Islam",
+    role: aboutData.director_message.director.designation || "Managing Director (25+ yrs experience)",
+    title: aboutData.director_message.title || "A word from the Director",
+    bio: aboutData.director_message.message || aboutData.director_message.director.full_bio || aboutData.director_message.director.short_bio,
+    image: resolveMediaUrl(aboutData.director_message.director.profile_media, `${A}/about/director-kamrul.png`),
+    align: "right" as const,
+  }] : [];
+
+  const otherDirectors = apiLeadership.map((l: any, i: number) => ({
+    name: l.full_name || l.name,
+    role: l.designation || l.role,
+    title: "",
+    bio: l.full_bio || l.short_bio || l.bio,
+    image: resolveMediaUrl(l.profile_media, i === 0 ? `${A}/about/02.jpeg` : `${A}/about/director-hasan.png`),
+    align: i % 2 === 0 ? ("left" as const) : ("right" as const),
+  }));
+
+  const directors = (leadDirector.length > 0 || otherDirectors.length > 0)
+    ? [...leadDirector, ...otherDirectors]
+    : [
+        {
+          name: "Kamrul Islam",
+          role: "Managing Director (25+ yrs experience)",
+          title: "A word from the Director",
+          bio: "Kamrul Islam is the Managing Director of Agrani Technologies and Services Limited, bringing over 25 years of extensive experience in the IT sector both in Bangladesh and internationally.",
+          image: `${A}/about/director-kamrul.png`,
+          align: "right" as const,
+        },
+        {
+          name: "Tanvir Mosaddaque",
+          role: "Executive Director (25+ yrs experience)",
+          title: "",
+          bio: "Tanvir Mosaddaque serves as the Executive Director of Agrani Technologies and Services Limited...",
+          image: `${A}/about/02.jpeg`,
+          align: "left" as const,
+        },
+        {
+          name: "Hasan Shahid Sarwar, FCA",
+          role: "Director (Finance & Operations)",
+          title: "",
+          bio: "Hasan Shahid Sarwar, FCA brings extensive financial expertise...",
+          image: `${A}/about/director-hasan.png`,
+          align: "right" as const,
+        },
+      ];
 
   const missionBullets = [
     "Deliver innovative, scalable and sustainable technology solutions tailored to your needs.",
