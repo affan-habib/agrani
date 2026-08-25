@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GradientButton, PageIntro } from "@/components/site-chrome";
+import { publicApi } from "@/lib/public-api/services";
+import { resolveMediaUrl } from "@/lib/public-api/media";
 
 const A = "/assets/figma";
 const pageCopy =
@@ -47,6 +49,13 @@ const aboutTabLabels: Record<AboutTab, "Our Mission" | "Our Vision" | "Our Value
 export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab }) {
   const router = useRouter();
   const [tab, setTab] = useState<AboutTab>(initialTab);
+  const [aboutData, setAboutData] = useState<any>(null);
+
+  useEffect(() => {
+    publicApi.getAbout()
+      .then((data) => setAboutData(data))
+      .catch((err) => console.warn("Using fallback about data:", err.message));
+  }, []);
 
   useEffect(() => setTab(initialTab), [initialTab]);
 
@@ -57,11 +66,11 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
 
   const directors = [
     {
-      name: "Kamrul Islam",
-      role: "Managing Director (25+ yrs experience)",
-      title: "A word from the Director",
-      bio: "Kamrul Islam is the Managing Director of Agrani Technologies and Services Limited, bringing over 25 years of extensive experience in the IT sector both in Bangladesh and internationally. Under his leadership, the company continues to grow as a trusted name in delivering innovative technology solutions. His deep industry knowledge and strategic vision have been instrumental in driving the organization’s success and commitment to excellence.",
-      image: `${A}/about/director-kamrul.png`,
+      name: aboutData?.director_message?.director?.full_name || "Kamrul Islam",
+      role: aboutData?.director_message?.director?.designation || "Managing Director (25+ yrs experience)",
+      title: aboutData?.director_message?.title || "A word from the Director",
+      bio: aboutData?.director_message?.message || aboutData?.director_message?.director?.full_bio || "Kamrul Islam is the Managing Director of Agrani Technologies and Services Limited, bringing over 25 years of extensive experience in the IT sector both in Bangladesh and internationally. Under his leadership, the company continues to grow as a trusted name in delivering innovative technology solutions. His deep industry knowledge and strategic vision have been instrumental in driving the organization’s success and commitment to excellence.",
+      image: resolveMediaUrl(aboutData?.director_message?.director?.profile_media, `${A}/about/director-kamrul.png`),
       align: "right", // image on right
     },
     {
@@ -155,8 +164,8 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
     <>
       <PageIntro
         label="About Us"
-        title="Company Overview"
-        copy="Agrani Technologies and Services Limited (ATSL) is a dynamic and forward-thinking IT company based in Bangladesh, committed to providing innovative solutions that solve real-world challenges."
+        title={aboutData?.overview?.title || "Company Overview"}
+        copy={aboutData?.overview?.description || "Agrani Technologies and Services Limited (ATSL) is a dynamic and forward-thinking IT company based in Bangladesh, committed to providing innovative solutions that solve real-world challenges."}
       />
 
       <motion.section
