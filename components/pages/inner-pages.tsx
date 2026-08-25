@@ -203,6 +203,7 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
                 alt={director.name}
                 className="director-photo"
                 loading="eager"
+                unoptimized={director.image?.startsWith("http")}
               />
             </div>
           </motion.div>
@@ -315,7 +316,7 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
                 className={`feedback-card ${item.dark ? "dark-card" : "light-card"}`}
               >
                 <div className="feedback-user">
-                  <Image src={item.avatar} width={42} height={42} alt={item.name} className="user-avatar" />
+                  <Image src={item.avatar} width={42} height={42} alt={item.name} className="user-avatar" unoptimized={item.avatar?.startsWith("http")} />
                   <div className="user-info">
                     <strong>{item.name}</strong>
                     <span>{item.role}</span>
@@ -335,7 +336,7 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
                 className={`feedback-card ${item.dark ? "dark-card" : "light-card"}`}
               >
                 <div className="feedback-user">
-                  <Image src={item.avatar} width={42} height={42} alt={item.name} className="user-avatar" />
+                  <Image src={item.avatar} width={42} height={42} alt={item.name} className="user-avatar" unoptimized={item.avatar?.startsWith("http")} />
                   <div className="user-info">
                     <strong>{item.name}</strong>
                     <span>{item.role}</span>
@@ -1277,7 +1278,7 @@ export function CareerPage() {
                   className={f.dark ? "feedback-card dark-card" : "feedback-card light-card"}
                 >
                   <div className="feedback-user">
-                    <Image src={f.avatar} width={40} height={40} alt={f.name} className="user-avatar" />
+                    <Image src={f.avatar} width={40} height={40} alt={f.name} className="user-avatar" unoptimized={f.avatar?.startsWith("http")} />
                     <strong>{f.name}</strong>
                     <span className="stars">★★★★★</span>
                   </div>
@@ -1301,7 +1302,7 @@ export function CareerPage() {
                   className={f.dark ? "feedback-card dark-card" : "feedback-card light-card"}
                 >
                   <div className="feedback-user">
-                    <Image src={f.avatar} width={40} height={40} alt={f.name} className="user-avatar" />
+                    <Image src={f.avatar} width={40} height={40} alt={f.name} className="user-avatar" unoptimized={f.avatar?.startsWith("http")} />
                     <strong>{f.name}</strong>
                     <span className="stars">★★★★★</span>
                   </div>
