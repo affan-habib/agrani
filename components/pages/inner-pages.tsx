@@ -978,18 +978,78 @@ export function WhyPage() {
 }
 
 export function CareerPage() {
-  const jobs = [
+  const [careerData, setCareerData] = useState<any>(null);
+  const [liveJobs, setLiveJobs] = useState<any[]>([]);
+  const [applyingJob, setApplyingJob] = useState<any | null>(null);
+  const [applyForm, setApplyForm] = useState({ name: "", email: "", phone: "", coverLetter: "" });
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [applySuccess, setApplySuccess] = useState(false);
+  const [applyError, setApplyError] = useState<string | null>(null);
+
+  useEffect(() => {
+    publicApi.getCareersPage()
+      .then((data) => setCareerData(data))
+      .catch((err) => console.warn("Using fallback careers data:", err.message));
+
+    publicApi.getJobs()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setLiveJobs(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleApplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!applyingJob) return;
+    setSubmitting(true);
+    setApplyError(null);
+    try {
+      const formData = new FormData();
+      formData.append("applicant_name", applyForm.name);
+      formData.append("email", applyForm.email);
+      formData.append("phone", applyForm.phone);
+      if (applyForm.coverLetter) formData.append("cover_letter", applyForm.coverLetter);
+      if (resumeFile) formData.append("resume", resumeFile);
+
+      await publicApi.applyForJob(applyingJob.id || applyingJob.slug, formData);
+      setApplySuccess(true);
+      setTimeout(() => {
+        setApplyingJob(null);
+        setApplySuccess(false);
+        setApplyForm({ name: "", email: "", phone: "", coverLetter: "" });
+        setResumeFile(null);
+      }, 2500);
+    } catch (err: any) {
+      setApplyError(err.message || "Failed to submit application. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const fallbackJobs = [
     { title: "Artist/Designer", category: "Design", tags: ["Ontime", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
     { title: "UI/UX Designer", category: "Design", tags: ["Ontime", "Fulltime", "Entry Level"], salary: "25,000 - 60,000" },
     { title: "PHP Developer", category: "Engineering", tags: ["Ontime", "Fulltime"], salary: "25,000 - 60,000" },
     { title: "Full-Stack Developer", category: "Engineering", tags: ["Ontime", "Fulltime", "Senior Level"], salary: "25,000 - 60,000" },
   ];
-  const internships = [
+  const fallbackInternships = [
     { title: "Artist/Designer", category: "Design", tags: ["Ontime", "Fulltime", "Entry Level"], salary: "5,000 - 10,000" },
     { title: "UI/UX Designer", category: "Design", tags: ["Ontime", "Fulltime", "Entry Level"], salary: "5,000 - 10,000" },
     { title: "PHP Developer", category: "Engineering", tags: ["Ontime", "Fulltime"], salary: "5,000 - 10,000" },
     { title: "Full-Stack Developer", category: "Engineering", tags: ["Ontime", "Fulltime", "Senior Level"], salary: "5,000 - 10,000" },
   ];
+
+  const experiencedJobs = (liveJobs.length > 0)
+    ? liveJobs.filter(j => j.opening_type !== "internship")
+    : fallbackJobs;
+
+  const internshipJobs = (liveJobs.length > 0)
+    ? liveJobs.filter(j => j.opening_type === "internship")
+    : fallbackInternships;
+
   const feedbacks = [
     {
       name: "Mashreef Ahamed",
@@ -1030,7 +1090,7 @@ export function CareerPage() {
       <PageIntro
         label="Career"
         title={<>Where technology meets<br />opportunity</>}
-        copy="Through our comprehensive training, recruitment practices and vibrant work environment, Agrani empowers talent to build meaningful careers."
+        copy={careerData?.hero?.description || "Through our comprehensive training, recruitment practices and vibrant work environment, Agrani empowers talent to build meaningful careers."}
       />
       <motion.section
         initial={{ opacity: 0, scale: 0.98 }}
@@ -1046,7 +1106,7 @@ export function CareerPage() {
         <div className="container">
           <h2>Employees Feedback</h2>
           <p className="employee-intro-p">
-            Thorough and comprehensive cleaning of all rooms, including inside cabinets and closets details appliance cleaning, ensuring the entire space is absolutely spotless
+            {careerData?.employee_feedback?.description || "Thorough and comprehensive cleaning of all rooms, including inside cabinets and closets details appliance cleaning, ensuring the entire space is absolutely spotless"}
           </p>
           <div className="testimonials-wrapper">
             <div className="testimonials-row">
@@ -1105,57 +1165,177 @@ export function CareerPage() {
         <h2>Current Openings</h2>
         <p className="section-subtext">Through our comprehensive training practices and vibrant work environment, Agrani empowers talent to build meaningful careers.</p>
         <div className="job-grid">
-          {jobs.map((j, i) => (
-            <motion.article
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: i * 0.08 }}
-              whileHover={{ y: -4 }}
-              key={j.title}
-            >
-              <small className="opening-badge">{j.category}</small>
-              <h3>{j.title}</h3>
-              <div className="job-tags">
-                {j.tags.map((t) => (
-                  <span key={t}>{t}</span>
-                ))}
-              </div>
-              <strong className="salary-text">
-                {j.salary} <i>BDT/Month</i>
-              </strong>
-              <Link className="job-btn" href="/contact">Apply Now</Link>
-            </motion.article>
-          ))}
+          {experiencedJobs.map((j: any, i: number) => {
+            const category = j.department?.name || j.category || "Engineering";
+            const tags = j.tags || [j.work_mode || "Onsite", j.employment_type || "Fulltime", j.opening_type || "Experienced"];
+            const salary = j.salary_range || j.salary || "Negotiable";
+
+            return (
+              <motion.article
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35, delay: i * 0.08 }}
+                whileHover={{ y: -4 }}
+                key={j.title + i}
+              >
+                <small className="opening-badge">{category}</small>
+                <h3>{j.title}</h3>
+                <div className="job-tags">
+                  {tags.map((t: string) => (
+                    <span key={t}>{t}</span>
+                  ))}
+                </div>
+                <strong className="salary-text">
+                  {salary} <i>BDT/Month</i>
+                </strong>
+                <button type="button" className="job-btn" onClick={() => setApplyingJob(j)}>Apply Now</button>
+              </motion.article>
+            );
+          })}
         </div>
 
         <h2 className="internship-heading">Internship Openings</h2>
         <p className="section-subtext">Through our comprehensive training practices and vibrant work environment, Agrani empowers talent to build meaningful careers.</p>
         <div className="job-grid">
-          {internships.map((j, i) => (
-            <motion.article
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: i * 0.08 }}
-              whileHover={{ y: -4 }}
-              key={j.title}
-            >
-              <small className="opening-badge red-badge">{j.category}</small>
-              <h3>{j.title}</h3>
-              <div className="job-tags">
-                {j.tags.map((t) => (
-                  <span key={t}>{t}</span>
-                ))}
-              </div>
-              <strong className="salary-text">
-                {j.salary} <i>BDT/Month</i>
-              </strong>
-              <Link className="job-btn" href="/contact">Apply Now</Link>
-            </motion.article>
-          ))}
+          {internshipJobs.map((j: any, i: number) => {
+            const category = j.department?.name || j.category || "Design";
+            const tags = j.tags || [j.work_mode || "Onsite", "Internship"];
+            const salary = j.salary_range || j.salary || "5,000 - 10,000";
+
+            return (
+              <motion.article
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35, delay: i * 0.08 }}
+                whileHover={{ y: -4 }}
+                key={j.title + i}
+              >
+                <small className="opening-badge red-badge">{category}</small>
+                <h3>{j.title}</h3>
+                <div className="job-tags">
+                  {tags.map((t: string) => (
+                    <span key={t}>{t}</span>
+                  ))}
+                </div>
+                <strong className="salary-text">
+                  {salary} <i>BDT/Month</i>
+                </strong>
+                <button type="button" className="job-btn" onClick={() => setApplyingJob(j)}>Apply Now</button>
+              </motion.article>
+            );
+          })}
         </div>
       </section>
+
+      {/* Interactive Job Application Modal */}
+      {applyingJob && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem" }}>
+          <div style={{ background: "#121c24", border: "1px solid #1f303f", borderRadius: 16, maxWidth: 520, width: "100%", padding: "2rem", color: "#f3f6f8", position: "relative" }}>
+            <button
+              onClick={() => setApplyingJob(null)}
+              style={{ position: "absolute", top: "1.25rem", right: "1.25rem", background: "none", border: "none", color: "#8b9baa", fontSize: "1.2rem", cursor: "pointer" }}
+            >
+              ✕
+            </button>
+
+            <h3 style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.25rem" }}>Apply for {applyingJob.title}</h3>
+            <p style={{ fontSize: "0.8rem", color: "#8b9baa", marginBottom: "1.25rem" }}>
+              Submit your details and CV to join Agrani Technologies
+            </p>
+
+            {applySuccess && (
+              <div style={{ background: "rgba(16, 185, 129, 0.2)", border: "1px solid #10b981", color: "#10b981", padding: "0.75rem 1rem", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>
+                ✓ Application submitted successfully! Our HR team will review your CV.
+              </div>
+            )}
+
+            {applyError && (
+              <div style={{ background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", color: "#ef4444", padding: "0.75rem 1rem", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>
+                {applyError}
+              </div>
+            )}
+
+            <form onSubmit={handleApplySubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", color: "#8b9baa", marginBottom: "0.3rem" }}>Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Your full name"
+                  style={{ width: "100%", background: "#0d141b", border: "1px solid #1f303f", color: "#f3f6f8", padding: "0.6rem 0.85rem", borderRadius: 8, fontSize: "0.85rem" }}
+                  value={applyForm.name}
+                  onChange={(e) => setApplyForm({ ...applyForm, name: e.target.value })}
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", color: "#8b9baa", marginBottom: "0.3rem" }}>Email *</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="you@email.com"
+                    style={{ width: "100%", background: "#0d141b", border: "1px solid #1f303f", color: "#f3f6f8", padding: "0.6rem 0.85rem", borderRadius: 8, fontSize: "0.85rem" }}
+                    value={applyForm.email}
+                    onChange={(e) => setApplyForm({ ...applyForm, email: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", color: "#8b9baa", marginBottom: "0.3rem" }}>Phone Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+880 1..."
+                    style={{ width: "100%", background: "#0d141b", border: "1px solid #1f303f", color: "#f3f6f8", padding: "0.6rem 0.85rem", borderRadius: 8, fontSize: "0.85rem" }}
+                    value={applyForm.phone}
+                    onChange={(e) => setApplyForm({ ...applyForm, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", color: "#8b9baa", marginBottom: "0.3rem" }}>Cover Letter / Brief Intro</label>
+                <textarea
+                  placeholder="Tell us why you are a great fit for this role..."
+                  style={{ width: "100%", minHeight: 70, background: "#0d141b", border: "1px solid #1f303f", color: "#f3f6f8", padding: "0.6rem 0.85rem", borderRadius: 8, fontSize: "0.85rem", resize: "vertical" }}
+                  value={applyForm.coverLetter}
+                  onChange={(e) => setApplyForm({ ...applyForm, coverLetter: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", color: "#8b9baa", marginBottom: "0.3rem" }}>Attach Resume (PDF / DOCX)</label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+                  style={{ fontSize: "0.8rem", color: "#8b9baa" }}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="gradient-button"
+                  style={{ flex: 1, padding: "0.75rem", border: "none", cursor: "pointer", borderRadius: 8, fontWeight: 600 }}
+                >
+                  {submitting ? "Submitting..." : "Submit Application"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setApplyingJob(null)}
+                  style={{ padding: "0.75rem 1.25rem", background: "#0d141b", border: "1px solid #1f303f", color: "#8b9baa", borderRadius: 8, cursor: "pointer" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
