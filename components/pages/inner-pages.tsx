@@ -481,7 +481,7 @@ export function CatalogPage({ products = false }: { products?: boolean }) {
 
 export type BlogCategory = "it-trends" | "ai-automation" | "cybersecurity" | "digital-transformation" | "industry-practices";
 
-const blogCategories: Array<[BlogCategory, string]> = [
+const fallbackBlogCategories: Array<[string, string]> = [
   ["it-trends", "IT trends"],
   ["ai-automation", "AI and automation"],
   ["cybersecurity", "Cybersecurity"],
@@ -489,16 +489,48 @@ const blogCategories: Array<[BlogCategory, string]> = [
   ["industry-practices", "Industry best practices"],
 ];
 
-export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cases?: boolean; initialCategory?: BlogCategory }) {
+export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cases?: boolean; initialCategory?: string }) {
   const router = useRouter();
-  const [category, setCategory] = useState<BlogCategory>(initialCategory);
+  const [category, setCategory] = useState<string>(initialCategory);
+  const [categoriesList, setCategoriesList] = useState<any[]>([]);
+  const [postsList, setPostsList] = useState<any[]>([]);
+  const [casesList, setCasesList] = useState<any[]>([]);
 
   useEffect(() => setCategory(initialCategory), [initialCategory]);
 
-  const selectCategory = (nextCategory: BlogCategory) => {
+  useEffect(() => {
+    if (!cases) {
+      publicApi.getBlogCategories()
+        .then((cats) => {
+          if (Array.isArray(cats) && cats.length > 0) {
+            setCategoriesList(cats);
+          }
+        })
+        .catch(() => {});
+
+      publicApi.getBlogPosts()
+        .then((posts) => {
+          if (Array.isArray(posts) && posts.length > 0) {
+            setPostsList(posts);
+          }
+        })
+        .catch(() => {});
+    } else {
+      publicApi.getCaseStudies()
+        .then((cs) => {
+          if (Array.isArray(cs) && cs.length > 0) {
+            setCasesList(cs);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [cases]);
+
+  const selectCategory = (nextCategory: string) => {
     setCategory(nextCategory);
     router.push(`/blog?category=${nextCategory}`, { scroll: false });
   };
+
   const blogImages = [
     `${A}/blog/desktop-whiteboard.jpg`,
     `${A}/blog/desktop-glasses.jpg`,
@@ -510,6 +542,58 @@ export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cas
     `${A}/blog/desktop-code.jpg`,
   ];
 
+  const renderedCategories = (categoriesList.length > 0)
+    ? categoriesList.map(c => [c.slug, c.name])
+    : fallbackBlogCategories;
+
+  const filteredPosts = (postsList.length > 0)
+    ? (category
+        ? postsList.filter(p => !p.categories || p.categories.some((c: any) => c.slug === category || c.slug === category.replace(/-/g, "-")))
+        : postsList)
+    : [];
+
+  const displayBlogItems = (filteredPosts.length > 0)
+    ? filteredPosts.map((p, i) => ({
+        title: p.title,
+        author: p.author?.name || "Olivia Rhye",
+        date: p.publication_date ? new Date(p.publication_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "27, march 2026",
+        image: resolveMediaUrl(p.featured_media, blogImages[i % blogImages.length]),
+        mobileImage: resolveMediaUrl(p.featured_media, mobileBlogImages[i % mobileBlogImages.length]),
+        slug: p.slug,
+        excerpt: p.excerpt || "Stories & Insights That Sparks Ideas: From tech updates to business tips...",
+      }))
+    : blogCards.map(([t, a], i) => ({
+        title: t,
+        author: a,
+        date: "27, march 2026",
+        image: blogImages[i % blogImages.length],
+        mobileImage: mobileBlogImages[i % mobileBlogImages.length],
+        slug: t.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        excerpt: "Stories & Insights That Sparks Ideas: From tech updates to business tips, explore our latest blogs that are sure to spark new ideas and fuel your growth.",
+      }));
+
+  const displayCaseItems = (casesList.length > 0)
+    ? casesList.map((cs, i) => ({
+        title: cs.title,
+        author: cs.client || cs.author?.name || "Stylii",
+        date: cs.publication_date ? new Date(cs.publication_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "27, march 2026",
+        image: resolveMediaUrl(cs.featured_media, blogImages[i % blogImages.length]),
+        mobileImage: resolveMediaUrl(cs.featured_media, mobileBlogImages[i % mobileBlogImages.length]),
+        slug: cs.slug,
+        excerpt: cs.short_summary || "Finding and booking salon services should not be stressful...",
+      }))
+    : blogCards.map(([t, a], i) => ({
+        title: i === 0 ? "A Salon Booking UX review" : t,
+        author: a,
+        date: "27, march 2026",
+        image: blogImages[i % blogImages.length],
+        mobileImage: mobileBlogImages[i % mobileBlogImages.length],
+        slug: t.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        excerpt: "Stories & Insights That Sparks Ideas: From tech updates to business tips, explore our latest case studies that are sure to spark new ideas and fuel your growth.",
+      }));
+
+  const items = cases ? displayCaseItems : displayBlogItems;
+
   return (
     <>
       <PageIntro
@@ -520,33 +604,40 @@ export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cas
       <section className="blog-listing container">
         {!cases && (
           <nav className="blog-category-tabs" aria-label="Blog categories">
-            {blogCategories.map(([categoryKey, label]) => (
-              <button className={category === categoryKey ? "active" : ""} onClick={() => selectCategory(categoryKey)} type="button" key={categoryKey}>{label}</button>
+            {renderedCategories.map(([categoryKey, label]) => (
+              <button
+                className={category === categoryKey ? "active" : ""}
+                onClick={() => selectCategory(categoryKey)}
+                type="button"
+                key={categoryKey}
+              >
+                {label}
+              </button>
             ))}
           </nav>
         )}
 
         <div className="blog-grid">
-          {blogCards.map(([title, author], i) => (
+          {items.map((item, i) => (
             <motion.div
-              key={`${title}-${i}`}
+              key={`${item.title}-${i}`}
               initial={{ opacity: 0, y: 25 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
               whileHover={{ y: -6 }}
             >
-              <Link href={cases ? "/case-study-details" : "/blog-details"} className="blog-card">
+              <Link href={cases ? `/case-study-details?slug=${item.slug}` : `/blog-details?slug=${item.slug}`} className="blog-card">
                 <div className="blog-img-wrap">
-                  <Image className="blog-image-desktop" src={blogImages[i]} fill sizes="608px" alt={title} loading="eager" />
-                  <Image className="blog-image-mobile" src={mobileBlogImages[i]} fill sizes="100vw" alt="" aria-hidden="true" loading="eager" />
+                  <Image className="blog-image-desktop" src={item.image} fill sizes="608px" alt={item.title} loading="eager" unoptimized={item.image.startsWith("http")} />
+                  <Image className="blog-image-mobile" src={item.mobileImage} fill sizes="100vw" alt="" aria-hidden="true" loading="eager" unoptimized={item.mobileImage.startsWith("http")} />
                   <div className="blog-image-meta">
-                    <strong>{author}</strong>
-                    <span>27, march 2026</span>
+                    <strong>{item.author}</strong>
+                    <span>{item.date}</span>
                   </div>
                 </div>
-                <h2>{cases && i === 0 ? "A Salon Booking UX review" : title}</h2>
-                <p>Stories &amp; Insights That Sparks Ideas: From tech updates to business tips, explore our latest blogs that are sure to spark new ideas and fuel your growth.</p>
+                <h2>{item.title}</h2>
+                <p>{item.excerpt}</p>
                 <span className="read-link">{cases ? "Read Case Study" : "Read Post"} <b>↗</b></span>
               </Link>
             </motion.div>
@@ -566,30 +657,50 @@ export function BlogGrid({ cases = false, initialCategory = "it-trends" }: { cas
 }
 
 export function BlogDetails() {
+  const [post, setPost] = useState<any>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("slug") || "our-top-javascripts-frameworks-to-use";
+    publicApi.getBlogPostBySlug(slug)
+      .then((data) => setPost(data))
+      .catch((err) => console.warn("Using fallback blog details:", err.message));
+  }, []);
+
+  const title = post?.title || "Digital payments revolution";
+  const authorName = post?.author?.name || "Andrew Jonson";
+  const authorRole = post?.author?.job_title || "Content manager";
+  const authorAvatar = resolveMediaUrl(post?.author?.avatar, `${A}/blog/mobile-author.png`);
+  const heroDesktop = resolveMediaUrl(post?.featured_media, `${A}/blog/desktop-detail-hero.jpg`);
+  const heroMobile = resolveMediaUrl(post?.featured_media, `${A}/blog/mobile-detail-hero.png`);
+  const metaDate = post?.publication_date
+    ? `${new Date(post.publication_date).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })} • ${post.reading_time_minutes || 5} min read`
+    : "11 Jan 2025 • 5 min ago posted";
+
   return (
     <>
-      <PageIntro label="Blog Details" meta="11 Jan 2025 • 5 min ago posted" title="Digital payments revolution" />
+      <PageIntro label="Blog Details" meta={metaDate} title={title} />
       <article className="article-page container">
         <div className="article-hero-wrap">
-          <Image className="article-hero-desktop" src={`${A}/blog/desktop-detail-hero.jpg`} fill sizes="1240px" alt="Digital payments revolution" priority />
-          <Image className="article-hero-mobile" src={`${A}/blog/mobile-detail-hero.png`} fill sizes="100vw" alt="Two people using digital payment apps" priority />
+          <Image className="article-hero-desktop" src={heroDesktop} fill sizes="1240px" alt={title} priority unoptimized={heroDesktop.startsWith("http")} />
+          <Image className="article-hero-mobile" src={heroMobile} fill sizes="100vw" alt={title} priority unoptimized={heroMobile.startsWith("http")} />
         </div>
         <aside>
           <div className="article-author">
-            <Image src={`${A}/blog/mobile-author.png`} width={48} height={48} alt="Andrew Jonson" />
-            <div><strong>Andrew Jonson</strong><span>Content manager</span></div>
+            <Image src={authorAvatar} width={48} height={48} alt={authorName} unoptimized={authorAvatar.startsWith("http")} />
+            <div><strong>{authorName}</strong><span>{authorRole}</span></div>
           </div>
           <p>Share this post</p>
           <div className="share-links">
-            <a href="#">Facebook</a>
-            <a href="#">Twitter</a>
-            <a href="#">LinkedIn</a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
           </div>
         </aside>
         <div className="article-copy">
           <h2>Introductions</h2>
           <p>
-            Digital payments have changed how people exchange value, making everyday transactions faster and more accessible. Secure platforms now connect customers and businesses across devices, locations and services.
+            {post?.excerpt || "Digital payments have changed how people exchange value, making everyday transactions faster and more accessible. Secure platforms now connect customers and businesses across devices, locations and services."}
           </p>
           <p>
             Artificial intelligence strengthens this shift by improving fraud detection, automating risk assessment and personalizing each customer experience. AI systems analyze transaction patterns in real time to flag unusual activity while keeping routine payments simple.
@@ -638,7 +749,7 @@ export function BlogDetails() {
         <div className="blog-grid compact">
           {blogCards.slice(6).map(([t, a, img]) => (
             <motion.div key={t} whileHover={{ y: -4 }}>
-              <Link className="blog-card" href="/blog-details">
+              <Link className="blog-card" href={`/blog-details?slug=${t.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
                 <div className="blog-img-wrap">
                   <Image src={`${A}/blog/${img}`} fill sizes="(max-width: 768px) 100vw, 590px" alt={t} loading="eager" />
                 </div>
@@ -655,16 +766,30 @@ export function BlogDetails() {
 }
 
 export function CaseStudyDetails() {
+  const [caseStudy, setCaseStudy] = useState<any>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("slug") || "stylii-salon-booking-transformation";
+    publicApi.getCaseStudyBySlug(slug)
+      .then((data) => setCaseStudy(data))
+      .catch((err) => console.warn("Using fallback case study details:", err.message));
+  }, []);
+
+  const title = caseStudy?.title || "Stylii Salon Booking Transformation";
+  const summary = caseStudy?.short_summary || "Stylii makes it seamless for both customers and salon owners.";
+  const previewImg = resolveMediaUrl(caseStudy?.featured_media, `${A}/blog/11.png`);
+
   return (
     <>
       <PageIntro
         label="Project Overview"
-        title={<>Finding and booking<br />salon services shouldn&apos;t be stressful</>}
-        copy="Stylii makes it seamless for both customers and salon owners."
+        title={<>{title}</>}
+        copy={summary}
       />
       <section className="case-overview container" aria-label="Project preview">
         <div className="case-device-frame">
-          <Image src={`${A}/blog/11.png`} fill sizes="(max-width: 768px) 90vw, 760px" alt="Salon booking product preview" priority />
+          <Image src={previewImg} fill sizes="(max-width: 768px) 90vw, 760px" alt={title} priority unoptimized={previewImg.startsWith("http")} />
         </div>
         <p>A friction-free booking journey designed around real customer needs and practical salon workflows.</p>
       </section>
@@ -748,10 +873,10 @@ export function CaseStudyDetails() {
             ["Finding and booking salon services made simple", `${A}/blog/02.png`],
             ["A clearer path from discovery to appointment", `${A}/blog/08.png`],
             ["Designed to support customers and salon teams", `${A}/career/05.jpeg`],
-          ].map(([title, image]) => (
-            <article key={title}>
+          ].map(([t, image]) => (
+            <article key={t}>
               <div><Image src={image} fill sizes="(max-width: 768px) 100vw, 420px" alt="" /></div>
-              <h3>{title}</h3>
+              <h3>{t}</h3>
               <p>Research insights were translated into an accessible, dependable booking journey with clear choices and helpful feedback.</p>
             </article>
           ))}
@@ -941,17 +1066,34 @@ export function ExpertisePage() {
 }
 
 export function WhyPage() {
-  const cards = [
-    "12+ years experience",
-    "100+ Professionals",
-    "24/7 Support available",
-    "Highly Experienced and Professionals",
-    "Maintain Security",
-    "Cost Efficient Product and Services",
-    "Cloud Infrastructure",
-    "High-Quality Product",
-    "Deliver On-time",
+  const [whyData, setWhyData] = useState<any[]>([]);
+
+  useEffect(() => {
+    publicApi.getWhyChooseUs()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setWhyData(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const fallbackCards = [
+    { title: "12+ years experience", desc: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs." },
+    { title: "100+ Professionals", desc: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs." },
+    { title: "24/7 Support available", desc: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs." },
+    { title: "Highly Experienced and Professionals", desc: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs." },
+    { title: "Maintain Security", desc: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs." },
+    { title: "Cost Efficient Product and Services", desc: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs." },
+    { title: "Cloud Infrastructure", desc: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs." },
+    { title: "High-Quality Product", desc: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs." },
+    { title: "Deliver On-time", desc: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs." },
   ];
+
+  const cards = (whyData.length > 0)
+    ? whyData.map(w => ({ title: w.title, desc: w.description || w.short_description || "Delivering trusted solutions with quality, innovation, and customer-first service." }))
+    : fallbackCards;
+
   return (
     <>
       <PageIntro label="Why Choose Us" title="Real-World Solutions" copy={pageCopy} />
@@ -964,11 +1106,11 @@ export function WhyPage() {
             transition={{ duration: 0.35, delay: i * 0.06 }}
             whileHover={{ y: -4 }}
             className={i === 2 ? "accent" : ""}
-            key={x}
+            key={x.title + i}
           >
             <div className="round-icon">✦</div>
-            <h2>{x}</h2>
-            <p>We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs.</p>
+            <h2>{x.title}</h2>
+            <p>{x.desc}</p>
             {i === 2 && <GradientButton href="/contact">Contact Us</GradientButton>}
           </motion.article>
         ))}
@@ -1341,18 +1483,27 @@ export function CareerPage() {
 }
 
 export function ContactPage() {
+  const [contactData, setContactData] = useState<any>(null);
+
+  useEffect(() => {
+    publicApi.getContactPage()
+      .then((data) => setContactData(data))
+      .catch((err) => console.warn("Using fallback contact data:", err.message));
+  }, []);
+
   const info = [
-    ["Address", "Plot-174/176, Road-02, Avenue-01, Mirpur DOHS, Dhaka-1216, Bangladesh"],
-    ["Phone", "+880-9610944449"],
-    ["Email", "info@agranitechbd.com"],
-    ["Website", "www.agranitechbd.com"],
+    ["Address", contactData?.site_settings?.contact?.address?.line_1 ? `${contactData.site_settings.contact.address.line_1}, ${contactData.site_settings.contact.address.city}-${contactData.site_settings.contact.address.postal_code || ""}, Bangladesh` : "Plot-174/176, Road-02, Avenue-01, Mirpur DOHS, Dhaka-1216, Bangladesh"],
+    ["Phone", contactData?.site_settings?.contact?.primary_phone || "+880-9610944449"],
+    ["Email", contactData?.site_settings?.contact?.primary_email || "info@agranitechbd.com"],
+    ["Website", contactData?.site_settings?.company?.website_url ? contactData.site_settings.company.website_url.replace(/^https?:\/\//, "") : "www.agranitechbd.com"],
   ];
+
   return (
     <>
       <PageIntro
         label="Contact Us"
-        title={<>Need expert guidance? Reach out to<br />our team—we&apos;d love to hear from you</>}
-        copy="Through a comprehensive range of services, our experts are ready to help."
+        title={contactData?.hero?.title || <>Need expert guidance? Reach out to<br />our team—we&apos;d love to hear from you</>}
+        copy={contactData?.hero?.description || "Through a comprehensive range of services, our experts are ready to help."}
       />
       <motion.section
         initial={{ opacity: 0, scale: 0.98 }}
