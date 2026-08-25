@@ -772,35 +772,67 @@ const testimonials = [
 ];
 
 export function TestimonialsPage() {
+  const [cxData, setCxData] = useState<any>(null);
+  const [liveTestimonials, setLiveTestimonials] = useState<any[]>([]);
+
+  useEffect(() => {
+    publicApi.getCustomerExperience()
+      .then((data) => setCxData(data))
+      .catch((err) => console.warn("Using fallback CX data:", err.message));
+
+    publicApi.getTestimonials()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setLiveTestimonials(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const fallbackTestimonialItems = [...Array(3)]
+    .flatMap(() => testimonials)
+    .slice(0, 10);
+
+  const displayList = (liveTestimonials.length > 0)
+    ? liveTestimonials
+    : fallbackTestimonialItems;
+
   return (
     <>
-      <PageIntro label="Customer Experience" title="More critics from our clients" copy={pageCopy} />
+      <PageIntro
+        label="Customer Experience"
+        title={cxData?.hero?.title || "More critics from our clients"}
+        copy={cxData?.hero?.description || pageCopy}
+      />
       <section className="testimonials container">
-        {[...Array(3)]
-          .flatMap(() => testimonials)
-          .slice(0, 10)
-          .map((testimonial, i) => (
+        {displayList.map((item, i) => {
+          const name = item.customer_name || item.name || "Client Partner";
+          const role = item.customer_role || item.role || "Executive";
+          const text = item.testimonial || "Working with Agrani has been an incredible experience, marked by an innovative work culture and a supportive team that inspires growth.";
+          const ratingStars = "★".repeat(Math.min(5, Math.max(1, item.rating || 5)));
+          const avatarUrl = resolveMediaUrl(item.avatar, `${A}/career/0${(i % 7) + 1}.png`);
+
+          return (
             <motion.article
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: (i % 4) * 0.1 }}
               whileHover={{ y: -4 }}
-              key={`${testimonial.name}-${i}`}
+              key={`${name}-${i}`}
             >
               <div>
-                <Image className="avatar" src={testimonial.avatar} width={36} height={36} alt="" />
-                <strong>{testimonial.name}</strong>
-                <b>★★★★★</b>
+                <Image className="avatar" src={avatarUrl} width={36} height={36} alt="" unoptimized={avatarUrl.startsWith("http")} />
+                <strong>{name}</strong>
+                <b>{ratingStars}</b>
               </div>
-              <p>
-                Working with Agrani has been an incredible experience, marked by an innovative work culture and a supportive team that inspires growth.
-              </p>
+              <p>{text}</p>
               <small>
-                Executive <i>Finance &amp; Admin</i>
+                {role} {item.company ? <i>{item.company}</i> : <i>Finance &amp; Admin</i>}
               </small>
             </motion.article>
-          ))}
+          );
+        })}
       </section>
     </>
   );
@@ -808,7 +840,15 @@ export function TestimonialsPage() {
 
 export function ExpertisePage() {
   const [openCsr, setOpenCsr] = useState(0);
-  const team = [
+  const [expertiseData, setExpertiseData] = useState<any>(null);
+
+  useEffect(() => {
+    publicApi.getExpertise()
+      .then((data) => setExpertiseData(data))
+      .catch((err) => console.warn("Using fallback expertise data:", err.message));
+  }, []);
+
+  const fallbackTeam = [
     "Software Engineers",
     "System Architects",
     "Database Experts",
@@ -819,21 +859,30 @@ export function ExpertisePage() {
     "Project Managers",
     "Support Engineers",
   ];
+
+  const team = (expertiseData?.roles && Array.isArray(expertiseData.roles) && expertiseData.roles.length > 0)
+    ? expertiseData.roles.map((r: any) => typeof r === "string" ? r : r.title || r.name)
+    : fallbackTeam;
+
   return (
     <>
-      <PageIntro label="Our Expertise" title="Real-World Solutions" copy={pageCopy} />
+      <PageIntro
+        label="Our Expertise"
+        title={expertiseData?.page?.title || "Real-World Solutions"}
+        copy={expertiseData?.page?.description || pageCopy}
+      />
       <section className="expertise container">
         <h2>Technical Team</h2>
         <p>Agrani&apos;s greatest asset is its people. The company employs over 100 professionals including:</p>
         <div className="feature-grid">
-          {team.map((x, i) => (
+          {team.map((x: string, i: number) => (
             <motion.article
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.35, delay: i * 0.05 }}
               whileHover={{ y: -4 }}
-              key={x}
+              key={x + i}
             >
               <div className="round-icon">
                 <Image src={`${A}/light/raw-${String((i % 4) + 1).padStart(2, "0")}.png`} width={32} height={32} alt="" />
