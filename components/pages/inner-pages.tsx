@@ -1227,6 +1227,20 @@ export function CareerPage() {
     },
   ];
 
+  function formatSalary(salary: any, fallback = "Negotiable"): string {
+    if (!salary) return fallback;
+    if (typeof salary === "string") return salary;
+    if (typeof salary === "number") return salary.toLocaleString();
+    if (typeof salary === "object") {
+      const min = salary.min ? Number(salary.min).toLocaleString() : null;
+      const max = salary.max ? Number(salary.max).toLocaleString() : null;
+      if (min && max) return `${min} - ${max}`;
+      if (min) return `${min}+`;
+      if (max) return `Up to ${max}`;
+    }
+    return fallback;
+  }
+
   return (
     <>
       <PageIntro
@@ -1308,9 +1322,18 @@ export function CareerPage() {
         <p className="section-subtext">Through our comprehensive training practices and vibrant work environment, Agrani empowers talent to build meaningful careers.</p>
         <div className="job-grid">
           {experiencedJobs.map((j: any, i: number) => {
-            const category = j.department?.name || j.category || "Engineering";
-            const tags = j.tags || [j.work_mode || "Onsite", j.employment_type || "Fulltime", j.opening_type || "Experienced"];
-            const salary = j.salary_range || j.salary || "Negotiable";
+            const category = (typeof j.department === "object" && j.department)
+              ? (j.department.name || "Engineering")
+              : (typeof j.category === "string" ? j.category : "Engineering");
+            const tags: string[] = Array.isArray(j.tags)
+              ? j.tags.map((t: any) => typeof t === "object" ? (t.name || t.title || String(t)) : String(t))
+              : [
+                  typeof j.work_mode === "string" ? j.work_mode : "Onsite",
+                  typeof j.employment_type === "string" ? j.employment_type : "Fulltime",
+                  typeof j.experience_level === "string" ? j.experience_level : "Experienced",
+                ].filter(Boolean);
+            const salary = formatSalary(j.salary || j.salary_range, "25,000 - 60,000");
+            const title = typeof j.title === "string" ? j.title : (j.title?.name || "Open Position");
 
             return (
               <motion.article
@@ -1319,10 +1342,10 @@ export function CareerPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.35, delay: i * 0.08 }}
                 whileHover={{ y: -4 }}
-                key={j.title + i}
+                key={title + i}
               >
                 <small className="opening-badge">{category}</small>
-                <h3>{j.title}</h3>
+                <h3>{title}</h3>
                 <div className="job-tags">
                   {tags.map((t: string) => (
                     <span key={t}>{t}</span>
@@ -1341,9 +1364,17 @@ export function CareerPage() {
         <p className="section-subtext">Through our comprehensive training practices and vibrant work environment, Agrani empowers talent to build meaningful careers.</p>
         <div className="job-grid">
           {internshipJobs.map((j: any, i: number) => {
-            const category = j.department?.name || j.category || "Design";
-            const tags = j.tags || [j.work_mode || "Onsite", "Internship"];
-            const salary = j.salary_range || j.salary || "5,000 - 10,000";
+            const category = (typeof j.department === "object" && j.department)
+              ? (j.department.name || "Design")
+              : (typeof j.category === "string" ? j.category : "Design");
+            const tags: string[] = Array.isArray(j.tags)
+              ? j.tags.map((t: any) => typeof t === "object" ? (t.name || t.title || String(t)) : String(t))
+              : [
+                  typeof j.work_mode === "string" ? j.work_mode : "Onsite",
+                  typeof j.employment_type === "string" ? j.employment_type : "Internship",
+                ].filter(Boolean);
+            const salary = formatSalary(j.salary || j.salary_range, "5,000 - 10,000");
+            const title = typeof j.title === "string" ? j.title : (j.title?.name || "Internship Position");
 
             return (
               <motion.article
@@ -1352,10 +1383,10 @@ export function CareerPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.35, delay: i * 0.08 }}
                 whileHover={{ y: -4 }}
-                key={j.title + i}
+                key={title + i}
               >
                 <small className="opening-badge red-badge">{category}</small>
-                <h3>{j.title}</h3>
+                <h3>{title}</h3>
                 <div className="job-tags">
                   {tags.map((t: string) => (
                     <span key={t}>{t}</span>
