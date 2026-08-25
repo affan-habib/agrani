@@ -190,6 +190,32 @@ export interface AdminSiteSettingsResource {
   copyright?: string | null;
 }
 
+export interface PublicHomePageResource {
+  hero?: {
+    tagline?: string | null;
+    title?: string | null;
+    subtitle?: string | null;
+    primary_cta?: { label?: string; url?: string } | null;
+    secondary_cta?: { label?: string; url?: string } | null;
+    background_media?: any;
+    [key: string]: any;
+  };
+  sections?: Record<string, any>;
+  statistics?: {
+    experience_years?: number | string;
+    professionals_count?: string;
+    sectors_count?: number | string;
+    reach_label?: string;
+    [key: string]: any;
+  };
+  services?: any[];
+  sectors?: any[];
+  why_choose_us?: any[];
+  testimonials?: any[];
+  site_settings?: any;
+  [key: string]: any;
+}
+
 export interface HomePageResource {
   hero?: {
     eyebrow?: string | null;

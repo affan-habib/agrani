@@ -6,33 +6,37 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/theme";
 import { SiteHeader, SiteFooter, Pill, GradientButton } from "@/components/site-chrome";
+import { publicApi } from "@/lib/public-api/services";
+import { resolveMediaUrl } from "@/lib/public-api/media";
+import { PublicHomePageResource } from "@/types/admin";
 
 const A = "/assets/figma";
 
-const services = [
+// Default Fallbacks for design integrity
+const fallbackServices = [
   {
     title: "Software\nDevelopment",
-    icon: `${A}/light/raw-01.png`,
+    icon: A + "/light/raw-01.png",
     copy: "We build custom web and mobile applications, ERP systems, e-commerce platforms, and more, tailored to your specific business needs.",
   },
   {
     title: "IT\nConsultancy",
-    icon: `${A}/light/raw-04.png`,
+    icon: A + "/light/raw-04.png",
     copy: "We help organizations plan smarter technology strategies, navigate digital transformation, and optimize existing systems for better performance.",
   },
   {
     title: "System\nIntegration",
-    icon: `${A}/light/raw-13.png`,
+    icon: A + "/light/raw-13.png",
     copy: "We connect your existing platforms and infrastructure into a unified, seamless ecosystem, reducing friction and improving operational efficiency.",
   },
   {
     title: "Cloud &\nInfrastructure",
-    icon: `${A}/light/raw-03.png`,
+    icon: A + "/light/raw-03.png",
     copy: "We build scalable cloud architecture, manage secure deployments, and ensure high availability for mission-critical enterprise workloads.",
   },
 ];
 
-const sectors = [
+const fallbackSectors = [
   {
     title: "Government",
     copy: "We build custom web and mobile applications, ERP systems, and secure e-governance platforms tailored to public sector workflows.",
@@ -55,7 +59,7 @@ const sectors = [
   },
 ];
 
-const reasons = [
+const fallbackReasons = [
   {
     title: "Experienced & Professional",
     desc: "Backed by 25+ years of leadership and 100+ vetted engineers delivering reliable enterprise systems nationwide.",
@@ -74,10 +78,9 @@ const reasons = [
   },
 ];
 
-// Apple/Linear smooth cubic bezier curve
 const premiumEase = [0.16, 1, 0.3, 1] as const;
 
-function Hero() {
+function Hero({ data }: { data?: PublicHomePageResource["hero"] }) {
   const [dimensions, setDimensions] = useState({ width: 1240, height: 600 });
   const heroRef = useRef<HTMLElement>(null);
 
@@ -106,8 +109,10 @@ function Hero() {
   const cr = 28;
 
   const clipPathD = isMobile
-    ? `M ${r} 0 H ${W - r} A ${r} ${r} 0 0 1 ${W} ${r} V ${H - r} A ${r} ${r} 0 0 1 ${W - r} ${H} H ${r} A ${r} ${r} 0 0 1 0 ${H - r} V ${r} A ${r} ${r} 0 0 1 ${r} 0 Z`
-    : `M ${r} 0 H ${notchX} A ${cr} ${cr} 0 0 1 ${notchX + cr} ${cr} A ${cr} ${cr} 0 0 0 ${notchX + cr * 2} ${shelfY} H ${W - r} A ${r} ${r} 0 0 1 ${W} ${shelfY + r} V ${H - r} A ${r} ${r} 0 0 1 ${W - r} ${H} H ${r} A ${r} ${r} 0 0 1 0 ${H - r} V ${r} A ${r} ${r} 0 0 1 ${r} 0 Z`;
+    ? "M " + r + " 0 H " + (W - r) + " A " + r + " " + r + " 0 0 1 " + W + " " + r + " V " + (H - r) + " A " + r + " " + r + " 0 0 1 " + (W - r) + " " + H + " H " + r + " A " + r + " " + r + " 0 0 1 0 " + (H - r) + " V " + r + " A " + r + " " + r + " 0 0 1 " + r + " 0 Z"
+    : "M " + r + " 0 H " + notchX + " A " + cr + " " + cr + " 0 0 1 " + (notchX + cr) + " " + cr + " A " + cr + " " + cr + " 0 0 0 " + (notchX + cr * 2) + " " + shelfY + " H " + (W - r) + " A " + r + " " + r + " 0 0 1 " + W + " " + (shelfY + r) + " V " + (H - r) + " A " + r + " " + r + " 0 0 1 " + (W - r) + " " + H + " H " + r + " A " + r + " " + r + " 0 0 1 0 " + (H - r) + " V " + r + " A " + r + " " + r + " 0 0 1 " + r + " 0 Z";
+
+  const heroImageSrc = resolveMediaUrl(data?.background_media, A + "/light/raw-11.jpeg");
 
   return (
     <div className="hero-outer-container container" id="top">
@@ -119,7 +124,6 @@ function Hero() {
         </defs>
       </svg>
 
-      {/* Floating pill in top-right notch */}
       {!isMobile && (
         <div className="hero-floating-pill">
           <span>About us</span>
@@ -131,7 +135,7 @@ function Hero() {
       <section className="hero" ref={heroRef} style={{ clipPath: "url(#hero-cutout-clip)" }}>
         <Image
           className="hero-image"
-          src={`${A}/light/raw-11.jpeg`}
+          src={heroImageSrc}
           fill
           sizes="(max-width: 900px) 100vw, 1240px"
           alt="Professional working in a modern technology office"
@@ -150,12 +154,27 @@ function Hero() {
               <svg className="star-icon" width="15" height="15" viewBox="0 0 24 24" fill="#f15827">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
-              <span>4.9 Reviews</span>
+              <span>{data?.tagline || "4.9 Reviews"}</span>
             </div>
             <h1>
-              Innovative IT<br />
-              Solutions for a<br />
-              Smarter Bangladesh
+              {data?.title ? (
+                data.title.includes("\n") ? (
+                  data.title.split("\n").map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      <br />
+                    </span>
+                  ))
+                ) : (
+                  data.title
+                )
+              ) : (
+                <>
+                  Innovative IT<br />
+                  Solutions for a<br />
+                  Smarter Bangladesh
+                </>
+              )}
             </h1>
           </motion.div>
 
@@ -165,15 +184,13 @@ function Hero() {
             transition={{ duration: 0.7, delay: 0.1, ease: premiumEase }}
             className="hero-side"
           >
-            <p>
-              Branding<br />
-              Mobile &amp; Web App Agency<br />
-              for Startups and Giants
+            <p style={{ whiteSpace: "pre-line" }}>
+              {data?.subtitle || "Branding\nMobile & Web App Agency\nfor Startups and Giants"}
             </p>
             <div className="hero-cta">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Link className="hero-explore-btn" href="#services">
-                  Explore Our Services
+                <Link className="hero-explore-btn" href={data?.primary_cta?.url || "#services"}>
+                  {data?.primary_cta?.label || "Explore Our Services"}
                 </Link>
               </motion.div>
               <motion.a
@@ -196,17 +213,18 @@ function Hero() {
   );
 }
 
-function Stats() {
-  const stats = [
-    ["10+", "Years of Experience"],
-    ["100+", "Professionals"],
-    ["4", "Sectors Served"],
-    ["Nationwide", "Reach"],
+function Stats({ data }: { data?: any }) {
+  const statsList = [
+    [data?.experience_years ? String(data.experience_years) + "+" : "10+", "Years of Experience"],
+    [data?.professionals_count || "100+", "Professionals"],
+    [String(data?.sectors_count || "4"), "Sectors Served"],
+    [data?.reach_label || "Nationwide", "Reach"],
   ];
+
   return (
     <section className="stats-section container">
       <div className="stats">
-        {stats.map(([n, l], i) => (
+        {statsList.map(([n, l], i) => (
           <motion.div
             key={l}
             initial={{ opacity: 0, y: 14 }}
@@ -225,7 +243,7 @@ function Stats() {
   );
 }
 
-function Services() {
+function Services({ data }: { data?: any[] }) {
   const railRef = useRef<HTMLDivElement>(null);
 
   const scrollRail = (direction: "left" | "right") => {
@@ -237,6 +255,14 @@ function Services() {
       });
     }
   };
+
+  const serviceItems = (data && data.length > 0)
+    ? data.map((item, i) => ({
+        title: item.title,
+        icon: resolveMediaUrl(item.icon, A + "/light/raw-0" + ((i % 4) + 1) + ".png"),
+        copy: item.short_description || item.copy || "",
+      }))
+    : fallbackServices;
 
   return (
     <section className="services-section section-glow" id="services">
@@ -265,7 +291,7 @@ function Services() {
 
       <div className="service-rail-container container">
         <div className="service-rail" ref={railRef} aria-label="Services">
-          {services.map((service, i) => (
+          {serviceItems.map((service, i) => (
             <motion.article
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -273,13 +299,13 @@ function Services() {
               transition={{ duration: 0.55, delay: i * 0.08, ease: premiumEase }}
               whileHover={{ y: -5, transition: { duration: 0.25, ease: premiumEase } }}
               className="service-card"
-              key={service.title}
+              key={service.title + i}
             >
               <div className="service-icon">
-                <Image src={service.icon} width={36} height={36} alt="" />
+                <Image src={service.icon} width={36} height={36} alt="" unoptimized={service.icon.startsWith("http")} />
               </div>
               <h3>
-                {service.title.split("\n").map((line) => (
+                {service.title.split("\n").map((line: string) => (
                   <span key={line}>
                     {line}
                     <br />
@@ -295,7 +321,15 @@ function Services() {
   );
 }
 
-function Sectors() {
+function Sectors({ data }: { data?: any[] }) {
+  const sectorItems = (data && data.length > 0)
+    ? data.map((s, i) => ({
+        title: s.title,
+        copy: s.short_description || s.copy || "",
+        featured: i === 0,
+      }))
+    : fallbackSectors;
+
   return (
     <section className="sectors-section section-glow" id="about">
       <div className="center-heading container">
@@ -307,15 +341,15 @@ function Sectors() {
       </div>
 
       <div className="sector-grid container">
-        {sectors.map((sector, i) => (
+        {sectorItems.map((sector, i) => (
           <motion.article
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.55, delay: i * 0.08, ease: premiumEase }}
             whileHover={{ y: -4, transition: { duration: 0.25, ease: premiumEase } }}
-            className={`sector-card sector-${i + 1}`}
-            key={sector.title}
+            className={"sector-card sector-" + (i + 1)}
+            key={sector.title + i}
           >
             <h3>{sector.title}</h3>
             <p>{sector.copy}</p>
@@ -327,12 +361,19 @@ function Sectors() {
   );
 }
 
-function WhyChoose() {
+function WhyChoose({ data }: { data?: any[] }) {
   const [active, setActive] = useState<number | null>(0);
 
   const toggleAccordion = (index: number) => {
     setActive(active === index ? null : index);
   };
+
+  const reasonItems = (data && data.length > 0)
+    ? data.map((r) => ({
+        title: r.title,
+        desc: r.description || r.desc || "",
+      }))
+    : fallbackReasons;
 
   return (
     <section className="why-section section-glow" id="why">
@@ -350,10 +391,10 @@ function WhyChoose() {
         </h2>
 
         <div className="accordion">
-          {reasons.map((reason, i) => {
+          {reasonItems.map((reason, i) => {
             const isOpen = active === i;
             return (
-              <div className={`accordion-item ${isOpen ? "active" : ""}`} key={reason.title}>
+              <div className={"accordion-item " + (isOpen ? "active" : "")} key={reason.title + i}>
                 <button
                   onClick={() => toggleAccordion(i)}
                   aria-expanded={isOpen}
@@ -393,6 +434,40 @@ function WhyChoose() {
 }
 
 function Contact() {
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    city: "Dhaka",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      await publicApi.submitQuoteRequest({
+        name: (form.firstName + " " + form.lastName).trim(),
+        email: form.firstName.toLowerCase() + "." + form.lastName.toLowerCase() + "@client.com",
+        phone: form.phone,
+        service_type: "General Project",
+        budget_range: "Flexible",
+        project_details: "Location/City: " + form.city + "\n\nMessage:\n" + form.message,
+        source_page: "Homepage",
+      });
+      setSubmitted(true);
+      setForm({ firstName: "", lastName: "", phone: "", city: "Dhaka", message: "" });
+    } catch (err: any) {
+      setError(err.message || "Failed to submit quote. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="contact-section container" id="contact">
       <motion.div
@@ -423,27 +498,62 @@ function Contact() {
         transition={{ duration: 0.6, delay: 0.1, ease: premiumEase }}
         className="quote-wrap"
       >
-        <Image className="quote-bg" src={`${A}/light/raw-02.png`} fill sizes="(max-width: 768px) 100vw, 710px" alt="" />
-        <form className="quote-form" onSubmit={(e) => e.preventDefault()}>
+        <Image className="quote-bg" src={A + "/light/raw-02.png"} fill sizes="(max-width: 768px) 100vw, 710px" alt="" />
+        <form className="quote-form" onSubmit={handleSubmit}>
           <h3>Request for Personal Quote</h3>
+
+          {submitted && (
+            <div style={{ background: "rgba(16, 185, 129, 0.15)", border: "1px solid #10b981", color: "#10b981", padding: "0.75rem 1rem", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>
+              ✓ Thank you! Your quote request has been received. Our team will contact you shortly.
+            </div>
+          )}
+
+          {error && (
+            <div style={{ background: "rgba(239, 68, 68, 0.15)", border: "1px solid #ef4444", color: "#ef4444", padding: "0.75rem 1rem", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>
+              {error}
+            </div>
+          )}
+
           <label>
             First name *
-            <input type="text" placeholder="John" name="firstName" required />
+            <input
+              type="text"
+              placeholder="John"
+              name="firstName"
+              required
+              value={form.firstName}
+              onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+            />
           </label>
           <label>
             Last name *
-            <input type="text" placeholder="Doe" name="lastName" required />
+            <input
+              type="text"
+              placeholder="Doe"
+              name="lastName"
+              required
+              value={form.lastName}
+              onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+            />
           </label>
           <label>
             Phone Number
             <div className="phone-input">
-              <Image src={`${A}/light/raw-14.png`} width={34} height={20} alt="Country selector" />
-              <input type="tel" placeholder="+880 1234 567890" />
+              <Image src={A + "/light/raw-14.png"} width={34} height={20} alt="Country selector" />
+              <input
+                type="tel"
+                placeholder="+880 1234 567890"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
             </div>
           </label>
           <label>
             City
-            <select defaultValue="Dhaka">
+            <select
+              value={form.city}
+              onChange={(e) => setForm({ ...form, city: e.target.value })}
+            >
               <option value="Dhaka">Dhaka</option>
               <option value="Chittagong">Chittagong</option>
               <option value="Sylhet">Sylhet</option>
@@ -453,15 +563,22 @@ function Contact() {
           </label>
           <label className="message">
             Message *
-            <textarea placeholder="Write your project requirements here..." name="message" required />
+            <textarea
+              placeholder="Write your project requirements here..."
+              name="message"
+              required
+              value={form.message}
+              onChange={(e) => setForm({ ...form, message: e.target.value })}
+            />
           </label>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            disabled={loading}
             className="gradient-button form-submit-btn"
             type="submit"
           >
-            Send Message
+            {loading ? "Submitting..." : "Send Message"}
           </motion.button>
         </form>
       </motion.div>
@@ -469,101 +586,24 @@ function Contact() {
   );
 }
 
-function HomeFooter() {
-  return (
-    <footer className="footer container">
-      <div className="footer-left">
-        <Link href="/" aria-label="Agrani home" className="footer-logo">
-          <Image src={`${A}/icons/logo-light.svg`} width={164} height={46} alt="Agrani Technologies & Services Limited" />
-        </Link>
-        <p>
-          Agrani Technologies &amp; Services Limited delivers transformative software and IT solutions for enterprises and government bodies across Bangladesh.
-        </p>
-
-        <nav className="footer-nav" aria-label="Footer navigation">
-          <Link href="/">Home</Link>
-          <Link href="/services">Product and Services</Link>
-          <Link href="/about">About Us</Link>
-          <Link href="/career">Career</Link>
-          <Link href="/contact">Contact Us</Link>
-          <Link href="/case-study">Case Studies</Link>
-        </nav>
-
-        <address>
-          Head Office: House 43, Road 12, Sector 10, Uttara, Dhaka-1230, Bangladesh.
-        </address>
-
-        <div className="contact-line">
-          <a href="mailto:info@agrani.com.bd" className="underlined">info@agrani.com.bd</a>
-          <a href="tel:+88028991234">+880 2 8991234</a>
-        </div>
-
-        <div className="social-dots">
-          <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-            </svg>
-          </a>
-          <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451c.979 0 1.778-.773 1.778-1.729V1.73C24 .774 23.205 0 22.225 0z" />
-            </svg>
-          </a>
-          <a href="https://twitter.com" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-          </a>
-          <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-            </svg>
-          </a>
-        </div>
-      </div>
-
-      <div className="footer-right">
-        <Image
-          className="footer-photo"
-          src={`${A}/light/raw-13.jpeg`}
-          width={500}
-          height={280}
-          alt="Agrani office culture"
-        />
-
-        <h3>Newsletter</h3>
-        <p>Stay updated with latest news and tech.</p>
-        <form className="newsletter" onSubmit={(e) => e.preventDefault()}>
-          <input type="email" placeholder="Email" name="email" required />
-          <button type="submit" aria-label="Subscribe to newsletter">
-            ›
-          </button>
-        </form>
-      </div>
-
-      <div className="footer-bottom">
-        <p>Copyright © 2024 Agrani Technologies. All rights reserved.</p>
-        <nav aria-label="Footer legal links">
-          <Link href="/about">Co-founder</Link>
-          <Link href="/contact">Privacy &amp; Cookies</Link>
-          <Link href="/terms">Terms Of Condition</Link>
-        </nav>
-      </div>
-    </footer>
-  );
-}
-
 export default function Home() {
   const { dark, toggleTheme } = useTheme();
+  const [homeData, setHomeData] = useState<PublicHomePageResource | null>(null);
+
+  useEffect(() => {
+    publicApi.getHome()
+      .then((data) => setHomeData(data))
+      .catch((err) => console.warn("Using fallback homepage design data:", err.message));
+  }, []);
 
   return (
     <main className={dark ? "site dark home-site" : "site light home-site"}>
       <SiteHeader dark={dark} toggleTheme={toggleTheme} active="Home" />
-      <Hero />
-      <Stats />
-      <Services />
-      <Sectors />
-      <WhyChoose />
+      <Hero data={homeData?.hero} />
+      <Stats data={homeData?.statistics} />
+      <Services data={homeData?.services} />
+      <Sectors data={homeData?.sectors} />
+      <WhyChoose data={homeData?.why_choose_us} />
       <Contact />
       <SiteFooter />
     </main>
