@@ -756,63 +756,82 @@ export function BlogDetails() {
           <p>
             {post?.excerpt || "Digital payments have changed how people exchange value, making everyday transactions faster and more accessible. Secure platforms now connect customers and businesses across devices, locations and services."}
           </p>
-          <p>
-            Artificial intelligence strengthens this shift by improving fraud detection, automating risk assessment and personalizing each customer experience. AI systems analyze transaction patterns in real time to flag unusual activity while keeping routine payments simple.
-          </p>
-          <p>
-            Thoughtful product design is equally important. Clear steps, familiar language and useful feedback help people understand what is happening at every stage of a payment.
-          </p>
-          <div className="article-inline-img">
-            <Image className="article-inline-desktop" src={`${A}/blog/desktop-detail-inline.jpg`} fill sizes="600px" alt="Customer using digital payments" />
-            <Image className="article-inline-mobile" src={`${A}/blog/mobile-detail-inline.png`} fill sizes="100vw" alt="Customer reviewing a payment on her phone" />
-          </div>
-          <blockquote>
-            Artificial intelligence is transforming payment by improving fraud detection, automating risk assessment and personalizing customer experience. AI systems analyze transaction patterns in real time to flag unusual activity, helping businesses operate securely and efficiently.
-          </blockquote>
-          <p>
-            Modern payment products must balance convenience with responsibility. Strong identity controls, encrypted infrastructure and transparent records build confidence without making the experience feel complicated.
-          </p>
-          <p>
-            Machine learning can also reduce manual review, surface useful insights and make support teams more effective. The result is a service that feels immediate while remaining dependable behind the scenes.
-          </p>
-          <h2>Why the platform matters</h2>
-          <p>
-            A payment platform is more than a checkout screen. It connects identity, account information, risk decisions, notifications and support into one continuous experience that people can understand and trust.
-          </p>
-          <p>
-            For businesses, that connected view improves reconciliation and makes it easier to identify where customers need help. For customers, it removes repeated steps and provides a clear record of every action.
-          </p>
-          <p>
-            Inclusive design keeps these benefits available across different devices, connection speeds and levels of digital confidence. Small details such as readable status messages and recoverable errors have a meaningful impact.
-          </p>
-          <h2>Conclusion</h2>
-          <p>
-            With smart tools, secure infrastructure and thoughtful customer experiences, modern payment platforms can create more value for everyone.
-          </p>
-          <p>
-            The most successful digital payment experiences keep people informed, protect their information and make complex technology feel effortless.
-          </p>
-          <p>
-            As digital services continue to evolve, the strongest products will pair intelligent automation with human-centered communication at every stage of the journey.
-          </p>
+          {post?.content && Array.isArray(post.content) && post.content.length > 0 ? (
+            post.content.map((block: any, idx: number) => {
+              if (block.type === "rich_text" && block.payload?.paragraphs) {
+                return (
+                  <div key={idx}>
+                    {block.payload.paragraphs.map((para: string, pIdx: number) => (
+                      <p key={pIdx}>{para}</p>
+                    ))}
+                  </div>
+                );
+              }
+              return null;
+            })
+          ) : (
+            <>
+              <p>
+                Artificial intelligence strengthens this shift by improving fraud detection, automating risk assessment and personalizing each customer experience. AI systems analyze transaction patterns in real time to flag unusual activity while keeping routine payments simple.
+              </p>
+              <p>
+                Thoughtful product design is equally important. Clear steps, familiar language and useful feedback help people understand what is happening at every stage of a payment.
+              </p>
+              <div className="article-inline-img">
+                <Image className="article-inline-desktop" src={`${A}/blog/desktop-detail-inline.jpg`} fill sizes="600px" alt="Customer using digital payments" />
+                <Image className="article-inline-mobile" src={`${A}/blog/mobile-detail-inline.png`} fill sizes="100vw" alt="Customer reviewing a payment on her phone" />
+              </div>
+              <blockquote>
+                Artificial intelligence is transforming payment by improving fraud detection, automating risk assessment and personalizing customer experience. AI systems analyze transaction patterns in real time to flag unusual activity, helping businesses operate securely and efficiently.
+              </blockquote>
+              <p>
+                Modern payment products must balance convenience with responsibility. Strong identity controls, encrypted infrastructure and transparent records build confidence without making the experience feel complicated.
+              </p>
+              <p>
+                Machine learning can also reduce manual review, surface useful insights and make support teams more effective. The result is a service that feels immediate while remaining dependable behind the scenes.
+              </p>
+              <h2>Why the platform matters</h2>
+              <p>
+                A payment platform is more than a checkout screen. It connects identity, account information, risk decisions, notifications and support into one continuous experience that people can understand and trust.
+              </p>
+            </>
+          )}
         </div>
       </article>
 
       <section className="similar container">
         <h2>Few more similar blogs</h2>
         <div className="blog-grid compact">
-          {blogCards.slice(6).map(([t, a, img]) => (
-            <motion.div key={t} whileHover={{ y: -4 }}>
-              <Link className="blog-card" href={`/blog-details?slug=${t.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
-                <div className="blog-img-wrap">
-                  <Image src={`${A}/blog/${img}`} fill sizes="(max-width: 768px) 100vw, 590px" alt={t} loading="eager" />
-                </div>
-                <small>{a}</small>
-                <h3>{t}</h3>
-                <span className="read-link">Read Post ↗</span>
-              </Link>
-            </motion.div>
-          ))}
+          {post?.related_posts && Array.isArray(post.related_posts) && post.related_posts.length > 0 ? (
+            post.related_posts.map((rp: any) => {
+              const rImg = resolveMediaUrl(rp.featured_media, `${A}/blog/04.png`);
+              return (
+                <motion.div key={rp.slug || rp.title} whileHover={{ y: -4 }}>
+                  <Link className="blog-card" href={`/blog-details?slug=${rp.slug}`}>
+                    <div className="blog-img-wrap">
+                      <Image src={rImg} fill sizes="(max-width: 768px) 100vw, 590px" alt={rp.title} loading="eager" unoptimized={rImg.startsWith("http")} />
+                    </div>
+                    <small>{rp.author?.name || "Agrani Editorial"}</small>
+                    <h3>{rp.title}</h3>
+                    <span className="read-link">Read Post ↗</span>
+                  </Link>
+                </motion.div>
+              );
+            })
+          ) : (
+            blogCards.slice(6).map(([t, a, img]) => (
+              <motion.div key={t} whileHover={{ y: -4 }}>
+                <Link className="blog-card" href={`/blog-details?slug=${t.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                  <div className="blog-img-wrap">
+                    <Image src={`${A}/blog/${img}`} fill sizes="(max-width: 768px) 100vw, 590px" alt={t} loading="eager" />
+                  </div>
+                  <small>{a}</small>
+                  <h3>{t}</h3>
+                  <span className="read-link">Read Post ↗</span>
+                </Link>
+              </motion.div>
+            ))
+          )}
         </div>
       </section>
     </>
@@ -1589,19 +1608,34 @@ export function ContactPage() {
       .catch((err) => console.warn("Using fallback contact data:", err.message));
   }, []);
 
+  const office = contactData?.office;
+  const settings = contactData?.site_settings;
+
+  const address = office?.address?.line_1
+    ? `${office.address.line_1}, ${office.address.city || ""}-${office.address.postal_code || ""}, ${office.address.country || "Bangladesh"}`
+    : (settings?.contact?.address?.line_1
+        ? `${settings.contact.address.line_1}, ${settings.contact.address.city || ""}-${settings.contact.address.postal_code || ""}, Bangladesh`
+        : "Plot-174/176, Road-02, Avenue-01, Mirpur DOHS, Dhaka-1216, Bangladesh");
+
+  const phone = office?.phones?.primary || settings?.contact?.primary_phone || "+880-9610944449";
+  const email = office?.emails?.primary || settings?.contact?.primary_email || "info@agranitechbd.com";
+  const website = office?.website_url || settings?.company?.website_url || "https://www.agranitechbd.com";
+
   const info = [
-    ["Address", contactData?.site_settings?.contact?.address?.line_1 ? `${contactData.site_settings.contact.address.line_1}, ${contactData.site_settings.contact.address.city}-${contactData.site_settings.contact.address.postal_code || ""}, Bangladesh` : "Plot-174/176, Road-02, Avenue-01, Mirpur DOHS, Dhaka-1216, Bangladesh"],
-    ["Phone", contactData?.site_settings?.contact?.primary_phone || "+880-9610944449"],
-    ["Email", contactData?.site_settings?.contact?.primary_email || "info@agranitechbd.com"],
-    ["Website", contactData?.site_settings?.company?.website_url ? contactData.site_settings.company.website_url.replace(/^https?:\/\//, "") : "www.agranitechbd.com"],
+    ["Address", address],
+    ["Phone", phone],
+    ["Email", email],
+    ["Website", website.replace(/^https?:\/\//, "")],
   ];
+
+  const mapEmbedUrl = contactData?.map?.embed_url;
 
   return (
     <>
       <PageIntro
-        label="Contact Us"
-        title={contactData?.hero?.title || <>Need expert guidance? Reach out to<br />our team—we&apos;d love to hear from you</>}
-        copy={contactData?.hero?.description || "Through a comprehensive range of services, our experts are ready to help."}
+        label={contactData?.page?.eyebrow || "Contact Us"}
+        title={contactData?.page?.title || contactData?.hero?.title || <>Need expert guidance? Reach out to<br />our team—we&apos;d love to hear from you</>}
+        copy={contactData?.page?.introduction || contactData?.hero?.description || "Through a comprehensive range of services, our experts are ready to help."}
       />
       <motion.section
         initial={{ opacity: 0, scale: 0.98 }}
@@ -1609,8 +1643,22 @@ export function ContactPage() {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
         className="map container"
+        style={{ position: "relative", minHeight: 380, overflow: "hidden", borderRadius: 16 }}
       >
-        <Image src={`${A}/contact/03.png`} fill sizes="(max-width: 900px) 100vw, 1240px" alt="Agrani Technologies office location map" priority />
+        {mapEmbedUrl ? (
+          <iframe
+            src={mapEmbedUrl}
+            width="100%"
+            height="100%"
+            style={{ border: 0, minHeight: 380, width: "100%", borderRadius: 16 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Office Location Map"
+          />
+        ) : (
+          <Image src={`${A}/contact/03.png`} fill sizes="(max-width: 900px) 100vw, 1240px" alt="Agrani Technologies office location map" priority />
+        )}
       </motion.section>
 
       <section className="info-grid container">
