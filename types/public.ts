@@ -118,7 +118,7 @@ export interface ServiceSummary {
   full_description?: string | null;
   icon?: PublicMedia | null;
   featured_image?: PublicMedia | null;
-  features?: Array<string | { title?: string; name?: string; description?: string }>;
+  features?: unknown;
   sort_order?: number;
   is_featured?: boolean;
 }

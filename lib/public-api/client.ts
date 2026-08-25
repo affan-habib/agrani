@@ -6,6 +6,13 @@ export interface PublicFetchOptions extends RequestInit {
   isMultipart?: boolean;
 }
 
+export class PublicApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+    this.name = "PublicApiError";
+  }
+}
+
 export async function publicFetch<T>(endpoint: string, options: PublicFetchOptions = {}): Promise<T> {
   if (!API_BASE_URL) {
     throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
@@ -62,7 +69,7 @@ export async function publicFetch<T>(endpoint: string, options: PublicFetchOptio
       const payload = data && typeof data === "object" ? data as { error?: { message?: string } } : null;
       const message = payload?.error?.message || response.statusText || "Public API request failed";
       console.warn(`[Public API] ${init.method || "GET"} ${url} returned ${response.status}:`, message);
-      throw new Error(message);
+      throw new PublicApiError(message, response.status);
     }
 
     return data as T;

@@ -21,7 +21,9 @@ export function ProductsContent({ data }: { data: ProductServicesPageData }) {
         <div className="catalog-list">
           {data.products.length ? data.products.map((product, index) => {
             const isOpen = open === index;
-            const features = (product.features || []).map((feature) => typeof feature === "string" ? feature : feature.title || feature.name || feature.description || "").filter(Boolean);
+            const features = Array.isArray(product.features)
+              ? product.features.map((feature) => typeof feature === "string" ? feature : feature.title || feature.name || feature.description || "").filter(Boolean)
+              : [];
             return (
               <motion.article initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className={isOpen ? "open" : ""} key={product.slug}>
                 <button type="button" onClick={() => setOpen(isOpen ? null : index)}><span>{String.fromCharCode(65 + index)}</span><strong>{product.title}</strong><span className="accordion-indicator">{isOpen ? "−" : "+"}</span></button>

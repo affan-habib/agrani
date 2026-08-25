@@ -32,7 +32,15 @@ export function ContentImage({
   const src = resolveMediaUrl(media, decorativeFallback);
 
   if (!src) {
-    return <div className={[className, "api-media-unavailable"].filter(Boolean).join(" ")} aria-label="Image unavailable" />;
+    return (
+      <div
+        className={[className, "api-media-unavailable"].filter(Boolean).join(" ")}
+        aria-label="Image unavailable"
+        style={fill
+          ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
+          : { width: width || "100%", height: height || 180, minHeight: height || 180 }}
+      />
+    );
   }
 
   return (

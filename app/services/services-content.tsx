@@ -7,7 +7,7 @@ import { EmptyContent } from "@/components/public-content";
 import { GradientButton, PageIntro } from "@/components/site-chrome";
 import type { ProductServicesPageData, ServiceSummary } from "@/types/public";
 
-function featureLabel(feature: NonNullable<ServiceSummary["features"]>[number]) {
+function featureLabel(feature: string | { title?: string; name?: string; description?: string }) {
   return typeof feature === "string" ? feature : feature.title || feature.name || feature.description || "";
 }
 
@@ -26,7 +26,7 @@ export function ServicesContent({ data }: { data: ProductServicesPageData }) {
         <div className="catalog-list">
           {data.services.length ? data.services.map((service, index) => {
             const isOpen = open === index;
-            const features = (service.features || []).map(featureLabel).filter(Boolean);
+            const features = Array.isArray(service.features) ? service.features.map(featureLabel).filter(Boolean) : [];
             return (
               <motion.article initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className={isOpen ? "open" : ""} key={service.slug}>
                 <button type="button" onClick={() => setOpen(isOpen ? null : index)}>

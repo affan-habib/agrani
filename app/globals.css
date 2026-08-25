@@ -5003,6 +5003,15 @@ textarea:focus {
   background: color-mix(in srgb, currentColor 6%, transparent);
 }
 
+.api-error-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.api-error-page .api-empty-state { max-width: 620px; }
+
 .job-modal-backdrop {
   position: fixed;
   inset: 0;
