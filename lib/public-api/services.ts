@@ -28,15 +28,20 @@ import {
 } from "@/types/admin";
 
 export interface SubmitQuotePayload {
-  name: string;
-  email: string;
-  phone?: string;
+  first_name?: string;
+  last_name?: string;
+  name?: string;
+  email?: string;
+  phone: string;
+  city?: string;
+  message?: string;
   company?: string;
   service_type?: string;
   budget_range?: string;
   timeline?: string;
-  project_details: string;
+  project_details?: string;
   source_page?: string;
+  [key: string]: any;
 }
 
 export interface SubscribeNewsletterPayload {
@@ -89,9 +94,21 @@ export const publicApi = {
 
   // Form Submissions
   submitQuoteRequest: (payload: SubmitQuotePayload) => {
+    const parts = (payload.name || "").trim().split(" ");
+    const firstName = payload.first_name || parts[0] || "Valued";
+    const lastName = payload.last_name || (parts.length > 1 ? parts.slice(1).join(" ") : "Client");
+    const body = {
+      first_name: firstName,
+      last_name: lastName,
+      phone: payload.phone || "+8801700000000",
+      message: payload.message || payload.project_details || "Inquiry from website",
+      source_page: payload.source_page || "Website",
+      email: payload.email,
+      city: payload.city,
+    };
     return publicFetch<ApiResponse<QuoteRequestResource>>("/quote-requests", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     }).then(r => r.data);
   },
   subscribeNewsletter: (payload: SubscribeNewsletterPayload) => {
