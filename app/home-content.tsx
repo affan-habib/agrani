@@ -69,8 +69,33 @@ function Services({ data, heading }: { data: HomePageData["services"]; heading: 
   const scroll = (direction: number) => railRef.current?.scrollBy({ left: direction * 400, behavior: "smooth" });
   return (
     <section className="services-section section-glow" id="services">
-      <div className="container service-heading"><Pill>{heading?.eyebrow}</Pill><div className="heading-row"><h2>{heading?.title}</h2><div className="round-arrows"><button type="button" onClick={() => scroll(-1)} aria-label="Previous service">‹</button><button type="button" onClick={() => scroll(1)} aria-label="Next service">›</button></div></div></div>
-      <div className="service-rail-container container"><div className="service-rail" ref={railRef}>{data.length ? data.map((service, index) => <motion.article whileHover={{ y: -5 }} className="service-card" key={service.slug}><div className="service-icon"><ContentImage media={serviceIcon(service, index)} width={36} height={36} alt="" /></div><h3>{service.title}</h3>{service.short_description && <p>{service.short_description}</p>}</motion.article>) : <EmptyContent message="Services are not available from the API." />}</div></div>
+      <div className="container service-heading">
+        <Pill>{heading?.eyebrow}</Pill>
+        <div className="heading-row">
+          <h2>{heading?.title}</h2>
+          <div className="round-arrows">
+            <button type="button" onClick={() => scroll(-1)} aria-label="Previous service">‹</button>
+            <button type="button" onClick={() => scroll(1)} aria-label="Next service">›</button>
+          </div>
+        </div>
+      </div>
+      <div className="service-rail-container container">
+        <div className="service-rail" ref={railRef}>
+          {data.length ? (
+            data.map((service, index) => (
+              <article className="service-card" key={service.slug || `service-${index}`}>
+                <div className="service-icon">
+                  <ContentImage media={serviceIcon(service, index)} width={36} height={36} alt="" />
+                </div>
+                <h3>{service.title}</h3>
+                {service.short_description && <p>{service.short_description}</p>}
+              </article>
+            ))
+          ) : (
+            <EmptyContent message="Services are not available from the API." />
+          )}
+        </div>
+      </div>
     </section>
   );
 }
@@ -78,8 +103,33 @@ function Services({ data, heading }: { data: HomePageData["services"]; heading: 
 function Sectors({ data, heading }: { data: HomePageData["sectors"]; heading: HomePageData["sections"]["sectors"] }) {
   return (
     <section className="sectors-section section-glow" id="about">
-      <div className="center-heading container"><Pill>{heading?.eyebrow}</Pill><h2 style={{ whiteSpace: "pre-line" }}>{heading?.title}</h2></div>
-      <div className="sector-grid container">{data.length ? data.map((sector, index) => <motion.article whileHover={{ y: -4 }} className={`sector-card sector-${index + 1}`} key={sector.slug}><h3>{sector.title}</h3>{sector.short_description && <p>{sector.short_description}</p>}<div className="sector-placeholder"><ContentImage media={sector.featured_image} fill sizes="420px" alt={sector.title} /></div></motion.article>) : <EmptyContent message="Sectors are not available from the API." />}</div>
+      <div className="center-heading container">
+        <Pill>{heading?.eyebrow}</Pill>
+        <h2 style={{ whiteSpace: "pre-line" }}>{heading?.title}</h2>
+      </div>
+      <div className="sector-grid container">
+        {data.length ? (
+          data.map((sector, index) => (
+            <article
+              className={`sector-card sector-${index + 1}`}
+              key={sector.slug || `sector-${index}`}
+            >
+              <h3>{sector.title}</h3>
+              {sector.short_description && <p>{sector.short_description}</p>}
+              <div className="sector-placeholder">
+                <ContentImage
+                  media={sector.featured_image}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 420px"
+                  alt={sector.title}
+                />
+              </div>
+            </article>
+          ))
+        ) : (
+          <EmptyContent message="Sectors are not available from the API." />
+        )}
+      </div>
     </section>
   );
 }
