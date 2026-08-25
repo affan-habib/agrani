@@ -113,13 +113,18 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
         },
       ];
 
-  const missionBullets = [
-    "Deliver innovative, scalable and sustainable technology solutions tailored to your needs.",
-    "Bridge the digital divide through accessible and inclusive technology for businesses and government.",
-    "Accelerate digital transformation across key sectors including fintech, education, and transport.",
-    "Foster talent, nurture continuous learning, and promote ethical, high-standard software practices.",
-    "Drive socio-economic development and technological sovereignty across Bangladesh.",
-  ];
+  const heroBanner = resolveMediaUrl(aboutData?.overview?.featured_media, `${A}/about/09.jpeg`);
+  const purposeImg = resolveMediaUrl(aboutData?.mission_vision?.featured_media, `${A}/career/05.jpeg`);
+
+  const missionBullets = (aboutData?.mission_vision?.mission_points && Array.isArray(aboutData.mission_vision.mission_points) && aboutData.mission_vision.mission_points.length > 0)
+    ? aboutData.mission_vision.mission_points.map((p: any) => p.description || p.title || p)
+    : [
+        "Deliver innovative, scalable and sustainable technology solutions tailored to your needs.",
+        "Bridge the digital divide through accessible and inclusive technology for businesses and government.",
+        "Accelerate digital transformation across key sectors including fintech, education, and transport.",
+        "Foster talent, nurture continuous learning, and promote ethical, high-standard software practices.",
+        "Drive socio-economic development and technological sovereignty across Bangladesh.",
+      ];
 
   const visionBullets = [
     "To be the foremost technological innovator and trusted transformation partner in South Asia.",
@@ -127,14 +132,7 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
     "Pioneering AI-driven automation, smart governance, and resilient digital infrastructure nationwide.",
   ];
 
-  const valuesBullets = [
-    "Integrity: Upholding transparent, ethical, and accountable standards in every client engagement.",
-    "Innovation: Constantly exploring cutting-edge technology stacks to solve real-world problems.",
-    "Customer Centricity: Prioritizing tangible outcomes, responsiveness, and long-term client success.",
-    "Excellence: Delivering robust, high-performance, and secure software architectures that stand the test of time.",
-  ];
-
-  const testimonialsRow1 = [
+  const defaultTestimonialsRow1 = [
     {
       name: "Steve Smith",
       role: "Director",
@@ -158,7 +156,7 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
     },
   ];
 
-  const testimonialsRow2 = [
+  const defaultTestimonialsRow2 = [
     {
       name: "Darlene Robertson",
       role: "President of Sales",
@@ -182,10 +180,23 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
     },
   ];
 
+  const apiTestimonials = (aboutData?.testimonials && Array.isArray(aboutData.testimonials) && aboutData.testimonials.length > 0)
+    ? aboutData.testimonials.map((t: any, i: number) => ({
+        name: t.customer_name || t.name,
+        role: t.customer_role || t.role || "Client Partner",
+        avatar: resolveMediaUrl(t.avatar, `${A}/career/0${(i % 7) + 1}.png`),
+        dark: i === 0,
+        text: t.testimonial || "Working with Agrani has been an incredible experience.",
+      }))
+    : null;
+
+  const testimonialsRow1 = apiTestimonials ? apiTestimonials.slice(0, 3) : defaultTestimonialsRow1;
+  const testimonialsRow2 = apiTestimonials ? apiTestimonials.slice(3, 6) : defaultTestimonialsRow2;
+
   return (
     <>
       <PageIntro
-        label="About Us"
+        label={aboutData?.overview?.eyebrow || "About Us"}
         title={aboutData?.overview?.title || "Company Overview"}
         copy={aboutData?.overview?.description || "Agrani Technologies and Services Limited (ATSL) is a dynamic and forward-thinking IT company based in Bangladesh, committed to providing innovative solutions that solve real-world challenges."}
       />
@@ -197,7 +208,14 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
         transition={{ duration: 0.6, ease: premiumEase }}
         className="about-hero container"
       >
-        <Image src={`${A}/about/09.jpeg`} fill sizes="(max-width: 900px) 100vw, 1240px" alt="Agrani team collaborating" priority />
+        <Image
+          src={heroBanner}
+          fill
+          sizes="(max-width: 900px) 100vw, 1240px"
+          alt={aboutData?.overview?.title || "Agrani team collaborating"}
+          priority
+          unoptimized={heroBanner.startsWith("http")}
+        />
       </motion.section>
 
       {/* 3 Alternating Directors */}
@@ -237,10 +255,16 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
         <div className="container">
           <div className="center-heading">
             <h2>
-              Driven by purpose, guided by<br />
-              Mission, vision, defined by values
+              {aboutData?.mission_vision?.title || (
+                <>
+                  Driven by purpose, guided by<br />
+                  Mission, vision, defined by values
+                </>
+              )}
             </h2>
-            <p className="purpose-subtext">Through a commitment to innovation, integrity and excellence, we shape every solution.</p>
+            <p className="purpose-subtext">
+              {aboutData?.mission_vision?.description || "Through a commitment to innovation, integrity and excellence, we shape every solution."}
+            </p>
           </div>
 
           <div className="tab-row">
@@ -300,12 +324,19 @@ export function AboutPage({ initialTab = "mission" }: { initialTab?: AboutTab })
                 className="purpose-body"
               >
                 <div className="purpose-image-wrap">
-                  <Image src={`${A}/career/05.jpeg`} width={520} height={360} alt="Coding for a better future" className="purpose-image" />
+                  <Image
+                    src={purposeImg}
+                    width={520}
+                    height={360}
+                    alt={aboutData?.mission_vision?.mission_title || "Coding for a better future"}
+                    className="purpose-image"
+                    unoptimized={purposeImg.startsWith("http")}
+                  />
                 </div>
                 <div className="purpose-text">
-                  <h3>Coding for a Better Future: Empowering Ideas, Inspiring Innovation</h3>
+                  <h3>{aboutData?.mission_vision?.mission_title || "Coding for a Better Future: Empowering Ideas, Inspiring Innovation"}</h3>
                   <ul className="purpose-check-list">
-                    {(tab === "mission" ? missionBullets : visionBullets).map((bullet) => (
+                    {(tab === "mission" ? missionBullets : visionBullets).map((bullet: string) => (
                       <li key={bullet}>
                         <span className="check-icon">✔</span>
                         <span>{bullet}</span>
@@ -1264,11 +1295,17 @@ export function CareerPage() {
     return fallback;
   }
 
+  const careerHeroImg = resolveMediaUrl(careerData?.hero?.media, `${A}/career/05.jpeg`);
+
   return (
     <>
       <PageIntro
-        label="Career"
-        title={<>Where technology meets<br />opportunity</>}
+        label={careerData?.hero?.eyebrow || "Career"}
+        title={careerData?.hero?.title ? (
+          <>{careerData.hero.title}</>
+        ) : (
+          <>Where technology meets<br />opportunity</>
+        )}
         copy={careerData?.hero?.description || "Through our comprehensive training, recruitment practices and vibrant work environment, Agrani empowers talent to build meaningful careers."}
       />
       <motion.section
@@ -1278,7 +1315,14 @@ export function CareerPage() {
         transition={{ duration: 0.5 }}
         className="career-hero container"
       >
-        <Image src={`${A}/career/05.jpeg`} fill sizes="(max-width: 900px) 100vw, 1240px" alt="Agrani career opportunity" priority />
+        <Image
+          src={careerHeroImg}
+          fill
+          sizes="(max-width: 900px) 100vw, 1240px"
+          alt={careerData?.hero?.title || "Agrani career opportunity"}
+          priority
+          unoptimized={careerHeroImg.startsWith("http")}
+        />
       </motion.section>
 
       <section className="employee-section">
