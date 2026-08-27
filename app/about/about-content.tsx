@@ -56,11 +56,24 @@ export function AboutContent({ data, initialTab }: { data: AboutPageData; initia
   const director = data.director_message?.director;
   const leaders = [director, ...(data.leadership || [])].filter((member): member is LeadershipMember => Boolean(member));
   const missionPoints = (data.mission_vision?.mission_points || []).flatMap((point) => point.description ? [point.description] : []);
-  const visionPoints = data.mission_vision?.vision ? [data.mission_vision.vision] : [];
+  const visionPoints = data.mission_vision?.vision
+    ? data.mission_vision.vision.split("\n").map((s) => s.trim()).filter(Boolean)
+    : [];
   const values = data.values || [];
   const testimonials = data.testimonials || [];
   const firstRow = testimonials.slice(0, Math.ceil(testimonials.length / 2));
   const secondRow = testimonials.slice(Math.ceil(testimonials.length / 2));
+
+  const getValueIcon = (title: string, index: number) => {
+    const t = title.toLowerCase();
+    if (t.includes("innovat")) return "🏆";
+    if (t.includes("team") || t.includes("collab")) return "🧩";
+    if (t.includes("integ") || t.includes("trust")) return "🛡️";
+    if (t.includes("custom") || t.includes("client")) return "❤️";
+    if (t.includes("excel") || t.includes("qual")) return "🏅";
+    const fallbacks = ["🏆", "🧩", "🛡️", "❤️", "🏅"];
+    return fallbacks[index % fallbacks.length];
+  };
 
   const selectTab = (next: AboutTab) => {
     setTab(next);
@@ -109,11 +122,39 @@ export function AboutContent({ data, initialTab }: { data: AboutPageData; initia
           <AnimatePresence mode="wait">
             {tab === "values" ? (
               <motion.div key="values" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="purpose-values-layout">
+                <div className="values-intro-col">
+                  <h3>{data.mission_vision?.mission_title || "Coding for a Better Future: Empowering Ideas, Inspiring Innovation"}</h3>
+                  {data.mission_vision?.description && <p className="values-subtext">{data.mission_vision.description}</p>}
+                  <div className="values-proof-card">
+                    <div className="proof-avatars">
+                      {testimonials.slice(0, 3).map((item, i) => (
+                        <span key={i}>
+                          <ContentImage media={item.avatar} width={30} height={30} alt={item.customer_name} />
+                        </span>
+                      ))}
+                      <b>★★★★★</b>
+                    </div>
+                    <p>{testimonials[0]?.testimonial || "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour."}</p>
+                    <div className="proof-stats">
+                      <div>
+                        <strong>10+</strong>
+                        <span>Years in Operation</span>
+                        <small>Leading IT Transformation</small>
+                      </div>
+                      <div>
+                        <strong>100+</strong>
+                        <span>Professionals</span>
+                        <small>Expert Engineers & Staff</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {values.length ? (
                   <div className="value-grid">
                     {values.map((value, index) => (
                       <article key={`${value.title}-${index}`}>
-                        <span className="value-icon" aria-hidden="true">✦</span>
+                        <span className="value-icon" aria-hidden="true">{getValueIcon(value.title || "", index)}</span>
                         {value.title && <h4>{value.title}</h4>}
                         {value.description && <p>{value.description}</p>}
                       </article>

@@ -37,7 +37,7 @@ function Hero({ data }: { data: HomePageData["hero"] }) {
   return (
     <div className="hero-outer-container container" id="top">
       <svg width="0" height="0" style={{ position: "absolute", pointerEvents: "none" }}><defs><clipPath id="hero-cutout-clip" clipPathUnits="userSpaceOnUse"><path d={clipPath} /></clipPath></defs></svg>
-      {!mobile && data.steps && data.steps.length > 0 && <div className="hero-floating-pill">{data.steps.map((step) => <span key={step.label}>{step.label}</span>)}</div>}
+      {data.steps && data.steps.length > 0 && <div className="hero-floating-pill">{data.steps.map((step) => <span key={step.label}>{step.label}</span>)}</div>}
       <section className="hero" ref={heroRef} style={{ clipPath: "url(#hero-cutout-clip)" }}>
         <ContentImage media={data.media} fill sizes="(max-width: 900px) 100vw, 1240px" alt={data.media?.alt_text || data.title || ""} className="hero-image" priority decorativeFallback="/assets/figma/light/raw-11.jpeg" />
         <div className="hero-shade" />

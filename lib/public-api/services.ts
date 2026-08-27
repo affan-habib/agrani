@@ -43,7 +43,27 @@ const data = <T>(response: ApiResponse<T>) => response.data;
 export const publicApi = {
   getHome: () => publicFetch<ApiResponse<HomePageData>>("/home").then(data),
   getAbout: () => publicFetch<ApiResponse<AboutPageData>>("/about").then(data),
-  getProductServices: () => publicFetch<ApiResponse<ProductServicesPageData>>("/product-services").then(data),
+  getProductServices: async () => {
+    const res = await publicFetch<ApiResponse<ProductServicesPageData>>("/product-services").then(data);
+    if (res && Array.isArray(res.services)) {
+      res.services = await Promise.all(
+        res.services.map(async (svc) => {
+          if (!Array.isArray(svc.features) || svc.features.length === 0) {
+            try {
+              const detailed = await publicFetch<ApiResponse<ServiceSummary>>(`/services/${svc.slug}`).then(data);
+              if (detailed && Array.isArray(detailed.features) && detailed.features.length > 0) {
+                return { ...svc, features: detailed.features };
+              }
+            } catch {
+              // fallback
+            }
+          }
+          return svc;
+        })
+      );
+    }
+    return res;
+  },
   getExpertise: () => publicFetch<ApiResponse<ExpertisePageData>>("/expertise").then(data),
   getCustomerExperience: () => publicFetch<ApiResponse<CustomerExperiencePageData>>("/customer-experience").then(data),
   getCareersPage: () => publicFetch<ApiResponse<CareerPageData>>("/careers").then(data),
