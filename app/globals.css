@@ -420,26 +420,31 @@ textarea:focus {
 
 .hero-floating-pill {
   position: absolute;
-  top: 6px;
+  top: 0px;
   right: 0;
   z-index: 20;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 999px;
   height: 44px;
-  padding: 0 22px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
-  gap: 18px;
+  justify-content: space-between;
+  gap: 12px;
   font-size: 13px;
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--muted);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  width: 337px;
 }
 
 .hero-floating-pill span {
   cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+  flex: 1;
   transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
