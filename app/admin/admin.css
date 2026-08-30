@@ -3,44 +3,44 @@
 :root,
 .admin-root[data-theme="dark"],
 .theme-dark {
-  --admin-bg: #080c11;
-  --admin-sidebar-bg: #0d141d;
-  --admin-surface: #121c27;
-  --admin-surface-hover: #182534;
-  --admin-surface-active: #1d2c3e;
-  --admin-border: #243548;
-  --admin-border-subtle: #172432;
-  --admin-border-focus: #f15827;
-  --admin-text-main: #f8fafc;
-  --admin-text-muted: #94a3b8;
-  --admin-text-subtle: #64748b;
-  --admin-header-bg: rgba(13, 20, 29, 0.82);
-  --admin-card-bg: #121c27;
-  --admin-table-header-bg: rgba(13, 20, 29, 0.9);
-  --admin-table-row-hover: #182534;
-  --admin-input-bg: #0b1118;
+  --admin-bg: #030712;
+  --admin-sidebar-bg: rgba(11, 15, 25, 0.7);
+  --admin-surface: rgba(17, 24, 39, 0.6);
+  --admin-surface-hover: rgba(31, 41, 55, 0.8);
+  --admin-surface-active: rgba(55, 65, 81, 0.9);
+  --admin-border: rgba(55, 65, 81, 0.4);
+  --admin-border-subtle: rgba(31, 41, 55, 0.3);
+  --admin-border-focus: #f97316;
+  --admin-text-main: #f9fafb;
+  --admin-text-muted: #9ca3af;
+  --admin-text-subtle: #6b7280;
+  --admin-header-bg: rgba(3, 7, 18, 0.75);
+  --admin-card-bg: rgba(17, 24, 39, 0.65);
+  --admin-table-header-bg: rgba(17, 24, 39, 0.85);
+  --admin-table-row-hover: rgba(31, 41, 55, 0.5);
+  --admin-input-bg: rgba(17, 24, 39, 0.9);
   
-  --admin-accent: #f15827;
-  --admin-accent-hover: #ff6f3d;
-  --admin-accent-soft: rgba(241, 88, 39, 0.12);
-  --admin-accent-glow: rgba(241, 88, 39, 0.25);
-  --admin-accent-gradient: linear-gradient(135deg, #f15827 0%, #ff7847 100%);
+  --admin-accent: #f97316;
+  --admin-accent-hover: #ea580c;
+  --admin-accent-soft: rgba(249, 115, 22, 0.15);
+  --admin-accent-glow: rgba(249, 115, 22, 0.4);
+  --admin-accent-gradient: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
   
   --admin-success: #10b981;
-  --admin-success-soft: rgba(16, 185, 129, 0.12);
+  --admin-success-soft: rgba(16, 185, 129, 0.15);
   --admin-warning: #f59e0b;
-  --admin-warning-soft: rgba(245, 158, 11, 0.12);
+  --admin-warning-soft: rgba(245, 158, 11, 0.15);
   --admin-danger: #ef4444;
-  --admin-danger-soft: rgba(239, 68, 68, 0.12);
+  --admin-danger-soft: rgba(239, 68, 68, 0.15);
   --admin-info: #3b82f6;
-  --admin-info-soft: rgba(59, 130, 246, 0.12);
+  --admin-info-soft: rgba(59, 130, 246, 0.15);
 
-  --admin-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --admin-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
-  --admin-shadow-lg: 0 20px 45px -10px rgba(0, 0, 0, 0.6);
-  --admin-scrollbar-thumb: #1c2b3c;
-  --admin-scrollbar-thumb-hover: #2a3f55;
-  --admin-font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --admin-shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --admin-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --admin-shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  --admin-scrollbar-thumb: rgba(75, 85, 99, 0.8);
+  --admin-scrollbar-thumb-hover: rgba(107, 114, 128, 0.9);
+  --admin-font: 'Outfit', Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* Light Theme Variables */
@@ -217,6 +217,8 @@
   width: 276px;
   min-width: 276px;
   background: var(--admin-sidebar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--admin-border);
   height: 100vh;
   max-height: 100vh;
@@ -424,9 +426,16 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.5rem 0.65rem;
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.admin-sidebar-user-card:hover {
+  background: var(--admin-surface-hover);
+  border-color: var(--admin-border-focus);
 }
 
 .admin-sidebar-user-avatar {
@@ -908,17 +917,37 @@
 }
 
 .admin-card {
-  background: var(--admin-surface);
+  background: var(--admin-card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--admin-border);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
   box-shadow: var(--admin-shadow);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .admin-card:hover {
-  border-color: var(--admin-border-focus);
+  transform: translateY(-4px);
+  box-shadow: var(--admin-shadow-lg);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.admin-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--admin-accent-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.admin-card:hover::before {
+  opacity: 1;
 }
 
 .admin-card-header {

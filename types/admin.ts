@@ -805,6 +805,7 @@ export interface MetricResource {
 }
 
 export interface StoreMetricRequest {
+  key?: string;
   label: string;
   value: string;
   suffix?: string | null;

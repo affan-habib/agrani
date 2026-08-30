@@ -60,10 +60,17 @@ export default function CompanyTeamAdminPage() {
       if (tab === "leadership") await leadershipApi.create(leaderForm);
       else if (tab === "values") await companyValuesApi.create(valueForm);
       else if (tab === "capabilities") await companyCapabilitiesApi.create(capForm);
-      else if (tab === "metrics") await metricsApi.create(metricForm);
+      else if (tab === "metrics") {
+        const key = metricForm.label.toLowerCase().replace(/[^a-z0-9]+/g, "-") || `metric-${Date.now()}`;
+        await metricsApi.create({ ...metricForm, key });
+      }
 
       showToast("Record added successfully", "success");
       setAddModal(false);
+      setLeaderForm({ full_name: "", designation: "", short_bio: "" });
+      setValueForm({ title: "", description: "" });
+      setCapForm({ title: "", description: "" });
+      setMetricForm({ label: "", value: "", suffix: "" });
       loadData();
     } catch (err: any) {
       showToast(err.message || "Failed to add record", "error");
