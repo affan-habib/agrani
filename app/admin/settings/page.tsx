@@ -53,8 +53,28 @@ export default function AdminSettingsPage() {
         sort_order: idx,
       }));
 
-      const payload = {
-        ...settings,
+      const payload: any = {
+        company_name: settings.company_name || null,
+        legal_name: settings.legal_name || null,
+        tagline: settings.tagline || null,
+        short_description: settings.short_description || null,
+        company_description: settings.company_description || null,
+        website_url: settings.website_url || null,
+        primary_email: settings.primary_email || null,
+        secondary_email: settings.secondary_email || null,
+        primary_phone: settings.primary_phone || null,
+        secondary_phone: settings.secondary_phone || null,
+        address_line_1: settings.address_line_1 || null,
+        address_line_2: settings.address_line_2 || null,
+        city: settings.city || null,
+        postal_code: settings.postal_code || null,
+        country: settings.country || null,
+        business_hours_text: settings.business_hours_text || null,
+        newsletter_title: settings.newsletter_title || null,
+        newsletter_description: settings.newsletter_description || null,
+        copyright_text: settings.copyright_text || null,
+        default_seo_title: settings.default_seo_title || null,
+        default_seo_description: settings.default_seo_description || null,
         social_links: formattedSocial,
       };
 
