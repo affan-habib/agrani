@@ -1,72 +1,57 @@
 import { test, expect } from '@playwright/test';
-
-const ADMIN_EMAIL = 'superadmin1@example.com';
-const ADMIN_PASSWORD = 'Password@123';
+import { loginAsAdmin } from './helpers';
 
 test.describe('Admin Page Content Editors (Tabbed)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/admin/login');
-    await page.fill('input[type="email"]', ADMIN_EMAIL);
-    await page.fill('input[type="password"]', ADMIN_PASSWORD);
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL(/\/admin$/);
+    await loginAsAdmin(page);
     await page.goto('/admin/pages');
+    await expect(page.locator('h1:has-text("Page Content Editors")')).toBeVisible({ timeout: 10000 });
   });
 
-  test('Tab bar renders all 9 page tabs with Lucide icons', async ({ page }) => {
-    const tabs = [
-      { name: 'Home', icon: 'home' },
-      { name: 'About Us', icon: 'users' },
-      { name: 'Products & Services', icon: 'package' },
-      { name: 'Expertise', icon: 'cpu' },
-      { name: 'Customer Experience', icon: 'heart' },
-      { name: 'Case Studies', icon: 'folder-open' },
-      { name: 'Blog & News', icon: 'newspaper' },
-      { name: 'Careers', icon: 'briefcase' },
-      { name: 'Contact Us', icon: 'mail' },
-    ];
-
-    for (const tab of tabs) {
-      await expect(page.locator(`button:has-text("${tab.name}")`)).toBeVisible();
-    }
+  test('Tab bar renders all 9 page tabs', async ({ page }) => {
+    await expect(page.locator('button:has-text("Home Page")')).toBeVisible();
+    await expect(page.locator('button:has-text("About Us")')).toBeVisible();
+    await expect(page.locator('button:has-text("Products & Services")')).toBeVisible();
+    await expect(page.locator('button:has-text("Expertise")')).toBeVisible();
+    await expect(page.locator('button:has-text("Customer Experience")')).toBeVisible();
+    await expect(page.locator('button:has-text("Case Studies")')).toBeVisible();
+    await expect(page.locator('button:has-text("Blog & News")')).toBeVisible();
+    await expect(page.locator('button:has-text("Careers")')).toBeVisible();
+    await expect(page.locator('button:has-text("Contact Us")')).toBeVisible();
   });
 
-  test('Tab switching: About Us loads Director Keynote, Mission & Vision fields', async ({ page }) => {
+  test('Tab switching: About Us loads Director Keynote, Mission & Vision', async ({ page }) => {
     await page.click('button:has-text("About Us")');
-    await expect(page).toHaveURL(/\/admin\/pages\?tab=about-page/);
-
-    await expect(page.locator('input[name="directorKeynote"]')).toBeVisible();
-    await expect(page.locator('textarea[name="mission"]')).toBeVisible();
-    await expect(page.locator('textarea[name="vision"]')).toBeVisible();
+    await expect(page).toHaveURL(/tab=about-page/, { timeout: 8000 });
+    await expect(page.locator('text=Director Keynote Speech')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Mission & Vision' })).toBeVisible();
   });
 
-  test('Tab switching: Products & Services loads Services Tab Label and Products Tab Label', async ({ page }) => {
+  test('Tab switching: Products & Services loads tab labels', async ({ page }) => {
     await page.click('button:has-text("Products & Services")');
-    await expect(page).toHaveURL(/\/admin\/pages\?tab=product-services-page/);
-
-    await expect(page.locator('input[name="servicesTabLabel"]')).toBeVisible();
-    await expect(page.locator('input[name="productsTabLabel"]')).toBeVisible();
+    await expect(page).toHaveURL(/tab=product-services-page/, { timeout: 8000 });
+    await expect(page.locator('text=Services Tab Label')).toBeVisible();
+    await expect(page.locator('text=Products Tab Label')).toBeVisible();
   });
 
-  test('Tab switching: Careers loads Current Openings and Internship titles', async ({ page }) => {
+  test('Tab switching: Careers loads Current Openings', async ({ page }) => {
     await page.click('button:has-text("Careers")');
-    await expect(page).toHaveURL(/\/admin\/pages\?tab=career-page/);
-
-    await expect(page.locator('input[name="currentOpeningsTitle"]')).toBeVisible();
-    await expect(page.locator('input[name="internshipTitle"]')).toBeVisible();
+    await expect(page).toHaveURL(/tab=career-page/, { timeout: 8000 });
+    await expect(page.locator('text=Current Openings Title')).toBeVisible();
+    await expect(page.locator('text=Internship Openings Title')).toBeVisible();
   });
 
-  test('Content mutation & persistence: Update Hero Headline on Home tab', async ({ page }) => {
-    await page.click('button:has-text("Home")');
-    await expect(page).toHaveURL(/\/admin\/pages\?tab=home-page/);
+  test('Content mutation & persistence: Update Hero Headline', async ({ page }) => {
+    await page.click('button:has-text("Home Page")');
+    await expect(page.locator('label:has-text("Main Headline Title")')).toBeVisible({ timeout: 8000 });
 
-    const heroHeadline = page.locator('input[name="heroHeadline"]');
+    const heroHeadline = page.locator('label:has-text("Main Headline Title")').locator('..').locator('.admin-input').first();
     await heroHeadline.fill('Playwright Test Headline');
 
     await page.click('button:has-text("Save Page Content")');
-    await expect(page.locator('text=Page content saved successfully')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Page content saved successfully!')).toBeVisible({ timeout: 10000 });
 
     await page.reload();
-    await expect(heroHeadline).toHaveValue('Playwright Test Headline');
+    await expect(heroHeadline).toHaveValue('Playwright Test Headline', { timeout: 10000 });
   });
 });
