@@ -13,10 +13,11 @@
 
 html {
   scroll-behavior: smooth;
+  background: #020f11;
 }
 
 body {
-  background: #f8f8f8;
+  background: #020f11;
   overflow-x: hidden;
   color: #051012;
 }
@@ -53,7 +54,7 @@ button {
   overflow-x: clip;
   background: var(--bg);
   color: var(--text);
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background-color 0.16s ease-out, color 0.16s ease-out;
 }
 
 .site.light {

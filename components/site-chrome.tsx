@@ -219,9 +219,9 @@ export function SiteHeader({ dark, toggleTheme, active }: { dark: boolean; toggl
 export function PageIntro({ label, title, copy, meta }: { label: string; title: React.ReactNode; copy?: string; meta?: string }) {
   return (
     <motion.section
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0.9, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: premiumEase }}
+      transition={{ duration: 0.28, ease: premiumEase }}
       className="page-intro container"
     >
       <Pill>{label}</Pill>
