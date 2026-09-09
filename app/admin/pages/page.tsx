@@ -272,6 +272,19 @@ export default function AdminPagesManager() {
               />
             )}
 
+            {activeTab === "career-page" && (
+              <MediaUploadField
+                label="Career Page Hero Banner"
+                description="The main featured header artwork on the Careers page"
+                value={data.hero_media_id ?? data.featured_media_id}
+                initialMedia={data.hero_media ?? data.featured_media}
+                onChange={(mediaId) => {
+                  handleChange("hero_media_id", mediaId);
+                  handleChange("featured_media_id", mediaId);
+                }}
+              />
+            )}
+
             {/* Home Page specific buttons */}
             {activeTab === "home-page" && (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "0.5rem" }}>
@@ -714,35 +727,66 @@ export default function AdminPagesManager() {
 
           {/* 4. CAREER SPECIAL SECTIONS */}
           {activeTab === "career-page" && (
-            <div className="admin-card" style={{ marginBottom: "1.5rem" }}>
-              <h2 className="admin-card-title" style={{ marginBottom: "1.25rem", fontSize: "1.1rem" }}>
-                Job List Headings
-              </h2>
-              <FormGroup label="Current Openings Title">
-                <input
-                  type="text"
-                  className="admin-input"
-                  value={data.current_openings_title || ""}
-                  onChange={(e) => handleChange("current_openings_title", e.target.value)}
-                />
-              </FormGroup>
-              <FormGroup label="Current Openings Description">
-                <input
-                  type="text"
-                  className="admin-input"
-                  value={data.current_openings_description || ""}
-                  onChange={(e) => handleChange("current_openings_description", e.target.value)}
-                />
-              </FormGroup>
-              <FormGroup label="Internship Openings Title">
-                <input
-                  type="text"
-                  className="admin-input"
-                  value={data.internship_openings_title || ""}
-                  onChange={(e) => handleChange("internship_openings_title", e.target.value)}
-                />
-              </FormGroup>
-            </div>
+            <>
+              <div className="admin-card" style={{ marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+                  <h2 className="admin-card-title" style={{ fontSize: "1.1rem" }}>
+                    Employees Feedback Section
+                  </h2>
+                  <Link href="/admin/testimonials" className="admin-btn admin-btn-secondary" style={{ fontSize: "0.8rem", padding: "0.35rem 0.75rem" }}>
+                    Manage Testimonials →
+                  </Link>
+                </div>
+                <FormGroup label="Section Headline Title">
+                  <input
+                    type="text"
+                    className="admin-input"
+                    placeholder="e.g. Employees Feedback"
+                    value={data.testimonials_title || ""}
+                    onChange={(e) => handleChange("testimonials_title", e.target.value)}
+                  />
+                </FormGroup>
+                <FormGroup label="Section Description">
+                  <textarea
+                    className="admin-textarea"
+                    style={{ minHeight: 75 }}
+                    placeholder="Brief description about team culture and feedback..."
+                    value={data.testimonials_description || ""}
+                    onChange={(e) => handleChange("testimonials_description", e.target.value)}
+                  />
+                </FormGroup>
+              </div>
+
+              <div className="admin-card" style={{ marginBottom: "1.5rem" }}>
+                <h2 className="admin-card-title" style={{ marginBottom: "1.25rem", fontSize: "1.1rem" }}>
+                  Job List Headings
+                </h2>
+                <FormGroup label="Current Openings Title">
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={data.current_openings_title || ""}
+                    onChange={(e) => handleChange("current_openings_title", e.target.value)}
+                  />
+                </FormGroup>
+                <FormGroup label="Current Openings Description">
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={data.current_openings_description || ""}
+                    onChange={(e) => handleChange("current_openings_description", e.target.value)}
+                  />
+                </FormGroup>
+                <FormGroup label="Internship Openings Title">
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={data.internship_openings_title || ""}
+                    onChange={(e) => handleChange("internship_openings_title", e.target.value)}
+                  />
+                </FormGroup>
+              </div>
+            </>
           )}
 
           {/* 5. QUOTE & BOTTOM CTA SECTION */}
