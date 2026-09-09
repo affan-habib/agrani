@@ -63,9 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
       title: "Content & Portfolio",
       items: [
         { label: "Blog Posts", href: "/admin/blog", icon: FileText },
-        { label: "Blog Categories", href: "/admin/blog/categories", icon: Tags },
         { label: "Case Studies", href: "/admin/case-studies", icon: Briefcase },
-        { label: "Case Study Tags", href: "/admin/case-studies/tags", icon: Bookmark },
         { label: "Services", href: "/admin/services", icon: Zap },
         { label: "Sectors", href: "/admin/sectors", icon: Globe },
       ],

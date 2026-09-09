@@ -3,13 +3,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { blogPostsApi } from "@/lib/admin-api/resources";
-import { BlogPostResource, UpdateBlogPostRequest } from "@/types/admin";
+import { blogPostsApi, blogCategoriesApi } from "@/lib/admin-api/resources";
+import { BlogPostResource, BlogCategoryResource, UpdateBlogPostRequest } from "@/types/admin";
 import { useToast } from "@/components/admin/ToastNotification";
 import { FormGroup } from "@/components/admin/FormControls";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { StatusActions } from "@/components/admin/StatusActions";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
+import { CategoryManagerModal } from "@/components/admin/CategoryManagerModal";
+import { Tags, Plus } from "lucide-react";
 
 export default function EditBlogPostPage() {
   const params = useParams();
@@ -19,14 +21,20 @@ export default function EditBlogPostPage() {
 
   const [post, setPost] = useState<BlogPostResource | null>(null);
   const [form, setForm] = useState<UpdateBlogPostRequest>({});
+  const [availableCategories, setAvailableCategories] = useState<BlogCategoryResource[]>([]);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    async function loadPost() {
+    async function loadData() {
       try {
-        const data = await blogPostsApi.get(id);
+        const [data, catRes] = await Promise.all([
+          blogPostsApi.get(id),
+          blogCategoriesApi.list({ per_page: 100 }).catch(() => ({ data: [] })),
+        ]);
         setPost(data);
+        setAvailableCategories(catRes.data || []);
         setForm({
           title: data.title,
           slug: data.slug,
@@ -35,6 +43,7 @@ export default function EditBlogPostPage() {
           status: data.status,
           is_featured: data.is_featured,
           featured_media_id: data.featured_media_id,
+          category_ids: data.categories?.map((c) => c.id) ?? data.category_ids ?? (data.category ? [data.category.id] : []),
           seo_title: data.seo_title || "",
           seo_description: data.seo_description || "",
         });
@@ -44,8 +53,17 @@ export default function EditBlogPostPage() {
         setLoading(false);
       }
     }
-    loadPost();
+    loadData();
   }, [id, showToast]);
+
+  const toggleCategory = (catId: number) => {
+    const current = (form.category_ids as number[]) || [];
+    if (current.includes(catId)) {
+      setForm({ ...form, category_ids: current.filter((c) => c !== catId) });
+    } else {
+      setForm({ ...form, category_ids: [...current, catId] });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,6 +134,59 @@ export default function EditBlogPostPage() {
             />
           </FormGroup>
 
+          {/* Category Selector with In-Modal Management */}
+          <div style={{ margin: "1.25rem 0", padding: "1rem", borderRadius: "8px", background: "rgba(99, 102, 241, 0.04)", border: "1px solid var(--admin-border)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+              <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--admin-text-main)" }}>
+                Categories
+              </label>
+              <button
+                type="button"
+                onClick={() => setCategoryModalOpen(true)}
+                className="admin-btn admin-btn-sm admin-btn-secondary"
+                style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.35rem", padding: "0.25rem 0.6rem" }}
+              >
+                <Tags size={13} />
+                <span>+ Manage / Add Categories</span>
+              </button>
+            </div>
+            <p style={{ fontSize: "0.78rem", color: "var(--admin-text-muted)", marginBottom: "0.75rem" }}>
+              Select categories that apply to this article.
+            </p>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {availableCategories.length === 0 ? (
+                <div style={{ fontSize: "0.825rem", color: "var(--admin-text-muted)" }}>
+                  No categories found. Click <strong>+ Manage / Add Categories</strong> above to add one in a modal.
+                </div>
+              ) : (
+                availableCategories.map((c) => {
+                  const active = ((form.category_ids as number[]) || []).includes(c.id);
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => toggleCategory(c.id)}
+                      style={{
+                        padding: "0.35rem 0.75rem",
+                        borderRadius: "20px",
+                        fontSize: "0.8rem",
+                        fontWeight: 500,
+                        cursor: "pointer",
+                        border: active ? "1.5px solid var(--admin-accent)" : "1px solid var(--admin-border)",
+                        background: active ? "rgba(99, 102, 241, 0.15)" : "var(--admin-surface)",
+                        color: active ? "var(--admin-accent)" : "var(--admin-text-muted)",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      {active ? "✓ " : ""}{c.name}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
           <MediaUploadField
             label="Featured Cover Image"
             description="The primary banner image displayed on the blog post header and cards"
@@ -171,6 +242,13 @@ export default function EditBlogPostPage() {
           </button>
         </div>
       </form>
+
+      {/* Category Manager Modal */}
+      <CategoryManagerModal
+        isOpen={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
+        onCategoriesChange={(newCats) => setAvailableCategories(newCats)}
+      />
     </div>
   );
 }

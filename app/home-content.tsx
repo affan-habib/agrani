@@ -149,7 +149,13 @@ export function HomeContent({ data }: { data: HomePageData }) {
   const { dark, toggleTheme } = useTheme();
   return (
     <main className={dark ? "site dark home-site" : "site light home-site"}>
-      <SiteHeader dark={dark} toggleTheme={toggleTheme} active="Home" />
+      <SiteHeader
+        dark={dark}
+        toggleTheme={toggleTheme}
+        active="Home"
+        branding={data.site_settings?.branding}
+        companyName={data.site_settings?.company?.name}
+      />
       <Hero data={data.hero} />
       <Stats data={data.statistics} />
       <Services data={data.services} heading={data.sections.services} />

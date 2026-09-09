@@ -99,24 +99,29 @@ export interface LoginRequest {
 export interface RoleResource {
   id: number;
   name: string;
+  slug?: string;
   display_name?: string;
-  description?: string;
-  permissions?: string[];
+  description?: string | null;
+  is_system?: boolean;
+  permissions?: (string | PermissionResource | number)[];
 }
 
 export interface PermissionResource {
   id: number;
   name: string;
   display_name?: string;
+  resource?: string;
+  action?: string;
   group?: string;
+  description?: string | null;
 }
 
 export interface SyncRolePermissionsRequest {
-  permissions: string[];
+  permissions: (number | string)[];
 }
 
 export interface SyncUserRolesRequest {
-  roles: string[];
+  roles: (number | string)[];
 }
 
 // ==========================================
@@ -217,6 +222,32 @@ export interface PublicHomePageResource {
 }
 
 export interface HomePageResource {
+  hero_eyebrow?: string | null;
+  hero_title?: string | null;
+  hero_description?: string | null;
+  hero_media_id?: number | null;
+  hero_media?: MediaResource | null;
+  review_rating?: string | number | null;
+  review_count?: number | null;
+  review_label?: string | null;
+  primary_cta_text?: string | null;
+  primary_cta_url?: string | null;
+  secondary_cta_text?: string | null;
+  secondary_cta_url?: string | null;
+  services_eyebrow?: string | null;
+  services_title?: string | null;
+  sectors_eyebrow?: string | null;
+  sectors_title?: string | null;
+  why_choose_us_eyebrow?: string | null;
+  why_choose_us_title?: string | null;
+  why_choose_us_cta_text?: string | null;
+  why_choose_us_cta_url?: string | null;
+  quote_title?: string | null;
+  quote_description?: string | null;
+  quote_form_title?: string | null;
+  hero_steps?: Array<{ label: string; sort_order: number }>;
+  seo_title?: string | null;
+  seo_description?: string | null;
   hero?: {
     eyebrow?: string | null;
     title?: string | null;
@@ -249,6 +280,7 @@ export interface HomePageResource {
     title?: string | null;
     description?: string | null;
   };
+  [key: string]: any;
 }
 
 export interface AboutPageResource {
@@ -428,6 +460,7 @@ export interface BlogPostResource {
   author?: PersonResource | null;
   category_ids?: number[];
   categories?: BlogCategoryResource[];
+  category?: BlogCategoryResource | null;
   related_post_ids?: number[];
   related_posts?: BlogPostResource[];
   seo_title?: string | null;
@@ -605,11 +638,18 @@ export interface ServiceResource {
   title: string;
   slug: string;
   short_description?: string | null;
+  full_description?: string | null;
   description?: string | null;
   icon_media_id?: number | null;
   icon_media?: MediaResource | null;
+  featured_image_media_id?: number | null;
   featured_media_id?: number | null;
   featured_media?: MediaResource | null;
+  media?: {
+    icon?: MediaResource | null;
+    featured_image?: MediaResource | null;
+    [key: string]: any;
+  } | null;
   features?: ServiceFeatureResource[] | null;
   status: ServiceStatus;
   sort_order?: number;
@@ -624,8 +664,10 @@ export interface StoreServiceRequest {
   title: string;
   slug?: string;
   short_description?: string | null;
+  full_description?: string | null;
   description?: string | null;
   icon_media_id?: number | null;
+  featured_image_media_id?: number | null;
   featured_media_id?: number | null;
   features?: ServiceFeatureResource[];
   status?: ServiceStatus;
@@ -815,28 +857,64 @@ export interface StoreMetricRequest {
 
 export interface TestimonialResource {
   id: number;
-  author_name: string;
-  author_title?: string | null;
-  company_name?: string | null;
-  content: string;
+  customer_name: string;
+  customer_role?: string | null;
+  company?: string | null;
+  department?: string | null;
+  testimonial: string;
   rating?: number | null;
   avatar_media_id?: number | null;
-  avatar_media?: MediaResource | null;
+  avatar?: MediaResource | null;
   status: TestimonialStatus;
   sort_order?: number;
+  is_featured?: boolean;
+  is_active?: boolean;
   created_at: string;
   updated_at: string;
+  // Aliases for compatibility
+  author_name?: string;
+  author_title?: string | null;
+  company_name?: string | null;
+  content?: string;
+  avatar_media?: MediaResource | null;
 }
 
 export interface StoreTestimonialRequest {
-  author_name: string;
-  author_title?: string | null;
-  company_name?: string | null;
-  content: string;
+  customer_name: string;
+  customer_role?: string | null;
+  company?: string | null;
+  department?: string | null;
+  testimonial: string;
   rating?: number | null;
   avatar_media_id?: number | null;
+  is_featured?: boolean;
+  is_active?: boolean;
   status?: TestimonialStatus;
   sort_order?: number;
+  // Aliases
+  author_name?: string;
+  author_title?: string | null;
+  company_name?: string | null;
+  content?: string;
+}
+
+export interface UpdateTestimonialRequest {
+  customer_name?: string;
+  customer_role?: string | null;
+  company?: string | null;
+  department?: string | null;
+  testimonial?: string;
+  rating?: number | null;
+  avatar_media_id?: number | null;
+  is_featured?: boolean;
+  is_active?: boolean;
+  status?: TestimonialStatus;
+  sort_order?: number;
+  // Aliases
+  author_name?: string;
+  author_title?: string | null;
+  company_name?: string | null;
+  content?: string;
 }
 
 export interface WhyChooseUsItemResource {

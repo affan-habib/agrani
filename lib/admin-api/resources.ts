@@ -40,6 +40,7 @@ import {
   StoreMetricRequest,
   TestimonialResource,
   StoreTestimonialRequest,
+  UpdateTestimonialRequest,
   WhyChooseUsItemResource,
   StoreWhyChooseUsItemRequest,
 } from "@/types/admin";
@@ -156,8 +157,22 @@ export const caseStudyTagsApi = {
 export const servicesApi = {
   list: (params?: ListQueryParams) => adminFetch<ApiPaginatedResponse<ServiceResource>>("/admin/services", { params }),
   get: (id: number) => adminFetch<ApiResponse<ServiceResource>>(`/admin/services/${id}`).then(r => r.data),
-  create: (data: StoreServiceRequest) => adminFetch<ApiResponse<ServiceResource>>("/admin/services", { method: "POST", body: JSON.stringify(cleanPayload(data)) }).then(r => r.data),
-  update: (id: number, data: UpdateServiceRequest) => adminFetch<ApiResponse<ServiceResource>>(`/admin/services/${id}`, { method: "PUT", body: JSON.stringify(cleanPayload(data)) }).then(r => r.data),
+  create: (data: StoreServiceRequest) => {
+    const payload: any = {
+      ...data,
+      full_description: data.full_description ?? data.description,
+      featured_image_media_id: data.featured_image_media_id ?? data.featured_media_id,
+    };
+    return adminFetch<ApiResponse<ServiceResource>>("/admin/services", { method: "POST", body: JSON.stringify(cleanPayload(payload)) }).then(r => r.data);
+  },
+  update: (id: number, data: UpdateServiceRequest) => {
+    const payload: any = {
+      ...data,
+      ...(data.full_description !== undefined || data.description !== undefined ? { full_description: data.full_description ?? data.description } : {}),
+      ...(data.featured_image_media_id !== undefined || data.featured_media_id !== undefined ? { featured_image_media_id: data.featured_image_media_id ?? data.featured_media_id } : {}),
+    };
+    return adminFetch<ApiResponse<ServiceResource>>(`/admin/services/${id}`, { method: "PUT", body: JSON.stringify(cleanPayload(payload)) }).then(r => r.data);
+  },
   delete: (id: number) => adminFetch(`/admin/services/${id}`, { method: "DELETE" }),
   publish: (id: number) => adminFetch<ApiResponse<ServiceResource>>(`/admin/services/${id}/publish`, { method: "POST" }).then(r => r.data),
   unpublish: (id: number) => adminFetch<ApiResponse<ServiceResource>>(`/admin/services/${id}/unpublish`, { method: "POST" }).then(r => r.data),
@@ -244,7 +259,7 @@ export const testimonialsApi = {
   list: (params?: ListQueryParams) => adminFetch<ApiPaginatedResponse<TestimonialResource>>("/admin/testimonials", { params }),
   get: (id: number) => adminFetch<ApiResponse<TestimonialResource>>(`/admin/testimonials/${id}`).then(r => r.data),
   create: (data: StoreTestimonialRequest) => adminFetch<ApiResponse<TestimonialResource>>("/admin/testimonials", { method: "POST", body: JSON.stringify(cleanPayload(data)) }).then(r => r.data),
-  update: (id: number, data: StoreTestimonialRequest) => adminFetch<ApiResponse<TestimonialResource>>(`/admin/testimonials/${id}`, { method: "PUT", body: JSON.stringify(cleanPayload(data)) }).then(r => r.data),
+  update: (id: number, data: UpdateTestimonialRequest) => adminFetch<ApiResponse<TestimonialResource>>(`/admin/testimonials/${id}`, { method: "PUT", body: JSON.stringify(cleanPayload(data)) }).then(r => r.data),
   delete: (id: number) => adminFetch(`/admin/testimonials/${id}`, { method: "DELETE" }),
   publish: (id: number) => adminFetch<ApiResponse<TestimonialResource>>(`/admin/testimonials/${id}/publish`, { method: "POST" }).then(r => r.data),
   unpublish: (id: number) => adminFetch<ApiResponse<TestimonialResource>>(`/admin/testimonials/${id}/unpublish`, { method: "POST" }).then(r => r.data),

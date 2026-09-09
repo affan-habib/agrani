@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { singletonsApi } from "@/lib/admin-api/singletons";
 import { useToast } from "@/components/admin/ToastNotification";
 import { FormGroup } from "@/components/admin/FormControls";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 export default function AdminSettingsPage() {
   const { showToast } = useToast();
@@ -64,6 +65,11 @@ export default function AdminSettingsPage() {
         secondary_email: settings.secondary_email || null,
         primary_phone: settings.primary_phone || null,
         secondary_phone: settings.secondary_phone || null,
+        whatsapp_phone: settings.whatsapp_phone || null,
+        map_embed_url: settings.map_embed_url || null,
+        logo_media_id: settings.logo_media_id || null,
+        favicon_media_id: settings.favicon_media_id || null,
+        footer_media_id: settings.footer_media_id || null,
         address_line_1: settings.address_line_1 || null,
         address_line_2: settings.address_line_2 || null,
         city: settings.city || null,
@@ -97,7 +103,7 @@ export default function AdminSettingsPage() {
       <div style={{ marginBottom: "2rem" }}>
         <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--admin-text-main)" }}>Global Site Settings</h1>
         <p style={{ color: "var(--admin-text-muted)", fontSize: "0.875rem" }}>
-          Manage global branding, contact details, social links, and footer information
+          Manage global branding, media assets, contact details, social links, and footer information
         </p>
       </div>
 
@@ -149,6 +155,49 @@ export default function AdminSettingsPage() {
               onChange={(e) => setSettings({ ...settings, short_description: e.target.value, company_description: e.target.value })}
             />
           </FormGroup>
+
+          <div style={{ borderTop: "1px solid var(--admin-border-subtle)", marginTop: "1.5rem", paddingTop: "1.5rem" }}>
+            <h3 style={{ fontSize: "1rem", fontWeight: 600, color: "var(--admin-text-main)", marginBottom: "1rem" }}>
+              Visual Identity & Media Assets
+            </h3>
+            <div className="admin-form-grid-2" style={{ gap: "1.5rem" }}>
+              <MediaUploadField
+                label="Primary Brand Logo"
+                description="Displayed in header and footer across all pages (SVG or PNG recommended)"
+                value={settings.logo_media_id}
+                initialMedia={settings.media?.logo}
+                onChange={(id, media) => setSettings({
+                  ...settings,
+                  logo_media_id: id,
+                  media: { ...(settings.media || {}), logo: media },
+                })}
+              />
+              <MediaUploadField
+                label="Browser Favicon"
+                description="Displayed in browser tabs and bookmarks (square PNG or ICO)"
+                value={settings.favicon_media_id}
+                initialMedia={settings.media?.favicon}
+                onChange={(id, media) => setSettings({
+                  ...settings,
+                  favicon_media_id: id,
+                  media: { ...(settings.media || {}), favicon: media },
+                })}
+              />
+            </div>
+            <div style={{ marginTop: "1.25rem" }}>
+              <MediaUploadField
+                label="Footer Photo / Graphic"
+                description="Visual illustration displayed beside newsletter subscription in footer"
+                value={settings.footer_media_id}
+                initialMedia={settings.media?.footer_image}
+                onChange={(id, media) => setSettings({
+                  ...settings,
+                  footer_media_id: id,
+                  media: { ...(settings.media || {}), footer_image: media },
+                })}
+              />
+            </div>
+          </div>
         </div>
 
         {/* CONTACT DETAILS */}
@@ -181,10 +230,30 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setSettings({ ...settings, primary_phone: e.target.value })}
               />
             </FormGroup>
+            <FormGroup label="Secondary Phone">
+              <input
+                type="text"
+                className="admin-input"
+                value={settings.secondary_phone || ""}
+                onChange={(e) => setSettings({ ...settings, secondary_phone: e.target.value })}
+              />
+            </FormGroup>
+          </div>
+          <div className="admin-form-grid-2">
+            <FormGroup label="WhatsApp Phone Number">
+              <input
+                type="text"
+                className="admin-input"
+                placeholder="+8801700000000"
+                value={settings.whatsapp_phone || ""}
+                onChange={(e) => setSettings({ ...settings, whatsapp_phone: e.target.value })}
+              />
+            </FormGroup>
             <FormGroup label="Business Hours">
               <input
                 type="text"
                 className="admin-input"
+                placeholder="e.g. Mon-Fri 9am-6pm"
                 value={settings.business_hours_text || ""}
                 onChange={(e) => setSettings({ ...settings, business_hours_text: e.target.value })}
               />
@@ -225,6 +294,15 @@ export default function AdminSettingsPage() {
               </div>
             </FormGroup>
           </div>
+          <FormGroup label="Google Maps Embed URL">
+            <input
+              type="text"
+              className="admin-input"
+              placeholder="https://www.google.com/maps?q=...&output=embed"
+              value={settings.map_embed_url || ""}
+              onChange={(e) => setSettings({ ...settings, map_embed_url: e.target.value })}
+            />
+          </FormGroup>
         </div>
 
         {/* SOCIAL MEDIA LINKS */}

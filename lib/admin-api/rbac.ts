@@ -12,18 +12,20 @@ export const rbacApi = {
     return res.data;
   },
 
-  syncRolePermissions: async (roleId: number, permissions: string[]): Promise<RoleResource> => {
+  syncRolePermissions: async (roleId: number, permissions: (number | string)[]): Promise<RoleResource> => {
+    const payload = permissions.map((p) => (typeof p === "number" ? p : isNaN(Number(p)) ? p : Number(p)));
     const res = await adminFetch<ApiResponse<RoleResource>>(`/admin/roles/${roleId}/permissions`, {
       method: "PUT",
-      body: JSON.stringify({ permissions }),
+      body: JSON.stringify({ permissions: payload }),
     });
     return res.data;
   },
 
-  syncUserRoles: async (userId: number, roles: string[]): Promise<any> => {
+  syncUserRoles: async (userId: number, roles: (number | string)[]): Promise<any> => {
+    const payload = roles.map((r) => (typeof r === "number" ? r : isNaN(Number(r)) ? r : Number(r)));
     const res = await adminFetch<ApiResponse<any>>(`/admin/users/${userId}/roles`, {
       method: "PUT",
-      body: JSON.stringify({ roles }),
+      body: JSON.stringify({ roles: payload }),
     });
     return res.data;
   },

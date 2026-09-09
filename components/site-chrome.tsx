@@ -44,11 +44,26 @@ export function GradientButton({ children, href = "/contact" }: { children: Reac
   );
 }
 
-export function SiteHeader({ dark, toggleTheme, active }: { dark: boolean; toggleTheme: () => void; active?: string }) {
+export function SiteHeader({
+  dark,
+  toggleTheme,
+  active,
+  branding,
+  companyName,
+}: {
+  dark: boolean;
+  toggleTheme: () => void;
+  active?: string;
+  branding?: SiteSettings["branding"];
+  companyName?: string | null;
+}) {
   const [open, setOpen] = useState(false);
   const [othersOpen, setOthersOpen] = useState(false);
   const desktopOthersRef = useRef<HTMLDivElement>(null);
   const mobileOthersRef = useRef<HTMLDivElement>(null);
+
+  const logoUrl = resolveMediaUrl(branding?.logo, A + "/icons/logo-light.svg");
+  const brandName = companyName || branding?.logo?.alt_text || "Agrani Technologies & Services Limited";
 
   useEffect(() => {
     if (!othersOpen) return;
@@ -83,8 +98,16 @@ export function SiteHeader({ dark, toggleTheme, active }: { dark: boolean; toggl
 
   return (
     <header className="site-header container inner-header">
-      <Link href="/" aria-label="Agrani home" className="logo-link">
-        <Image src={A + "/icons/logo-light.svg"} width={164} height={46} alt="Agrani Technologies & Services Limited" priority />
+      <Link href="/" aria-label={`${brandName} home`} className="logo-link">
+        <Image
+          src={logoUrl}
+          width={164}
+          height={46}
+          alt={brandName}
+          priority
+          unoptimized={logoUrl.startsWith("http")}
+          style={{ objectFit: "contain", maxHeight: 46, width: "auto" }}
+        />
       </Link>
 
       <button
@@ -409,12 +432,23 @@ export function SiteFooter({ settings }: { settings?: SiteSettings }) {
   const hours = contact?.business_hours || "";
   const copyrightText = settings?.footer?.copyright || "";
   const footerImage = resolveMediaUrl(settings?.branding?.footer_image, A + "/light/raw-05.png");
+  const footerLogoUrl = resolveMediaUrl(settings?.branding?.logo, A + "/icons/logo-footer.svg");
+  const companyAlt = company?.name || "Agrani Technologies & Services Limited";
 
   return (
     <footer className="footer container" id="footer">
       <div className="footer-left">
-        <Link href="/" aria-label="Agrani home">
-          <Image className="footer-logo" src={A + "/icons/logo-footer.svg"} width={205} height={57} alt="Agrani Technologies & Services Limited" loading="eager" />
+        <Link href="/" aria-label={`${companyAlt} home`}>
+          <Image
+            className="footer-logo"
+            src={footerLogoUrl}
+            width={205}
+            height={57}
+            alt={companyAlt}
+            loading="eager"
+            unoptimized={footerLogoUrl.startsWith("http")}
+            style={{ objectFit: "contain", maxHeight: 57, width: "auto" }}
+          />
         </Link>
         {settings?.footer?.description && <p>{settings.footer.description}</p>}
         
@@ -513,9 +547,22 @@ export function SiteFooter({ settings }: { settings?: SiteSettings }) {
       </div>
 
       <div className="floating-actions">
-        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} aria-label="Chat with us">
-          <Image src={A + "/light/raw-08.png"} width={36} height={36} alt="" />
-        </motion.button>
+        {contact?.whatsapp_phone ? (
+          <motion.a
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            href={`https://wa.me/${contact.whatsapp_phone.replace(/[^0-9]/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp chat"
+          >
+            <Image src={A + "/light/raw-08.png"} width={36} height={36} alt="WhatsApp" />
+          </motion.a>
+        ) : (
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} aria-label="Chat with us">
+            <Image src={A + "/light/raw-08.png"} width={36} height={36} alt="" />
+          </motion.button>
+        )}
         {phone && <motion.a whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} href={`tel:${phone}`} aria-label="Call us">
           <Image src={A + "/light/raw-07.png"} width={36} height={36} alt="" />
         </motion.a>}
@@ -542,7 +589,13 @@ export function ThemePage({
   const routeClass = "route-" + (pathname.split("/").filter(Boolean).join("-") || "home");
   return (
     <main className={(dark ? "site dark" : "site light") + " inner-site " + routeClass}>
-      <SiteHeader dark={dark} toggleTheme={toggleTheme} active={active} />
+      <SiteHeader
+        dark={dark}
+        toggleTheme={toggleTheme}
+        active={active}
+        branding={siteSettings?.branding}
+        companyName={siteSettings?.company?.name}
+      />
       {children}
       {includeContact && <ContactBlock quote={quote} />}
       <SiteFooter settings={siteSettings} />

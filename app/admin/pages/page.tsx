@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { singletonsApi } from "@/lib/admin-api/singletons";
 import { useToast } from "@/components/admin/ToastNotification";
 import { FormGroup } from "@/components/admin/FormControls";
+import Link from "next/link";
 import {
   Home,
   Building2,
@@ -17,6 +18,7 @@ import {
   Mail,
   Save,
   Loader2,
+  Globe,
 } from "lucide-react";
 import { leadershipApi } from "@/lib/admin-api/resources";
 import { LeadershipMemberResource } from "@/types/admin";
@@ -261,9 +263,12 @@ export default function AdminPagesManager() {
               <MediaUploadField
                 label="Home Page Hero Media"
                 description="The primary showcase hero graphic on the Agrani home page"
-                value={data.featured_media_id}
-                initialMedia={data.featured_media}
-                onChange={(mediaId) => handleChange("featured_media_id", mediaId)}
+                value={data.hero_media_id ?? data.featured_media_id}
+                initialMedia={data.hero_media ?? data.featured_media}
+                onChange={(mediaId) => {
+                  handleChange("hero_media_id", mediaId);
+                  handleChange("featured_media_id", mediaId);
+                }}
               />
             )}
 
@@ -311,6 +316,193 @@ export default function AdminPagesManager() {
               </div>
             )}
           </div>
+
+          {/* HOME PAGE SECTIONS */}
+          {activeTab === "home-page" && (
+            <>
+              {/* Services Carousel Section */}
+              <div className="admin-card" style={{ marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <div>
+                    <h2 className="admin-card-title" style={{ fontSize: "1.1rem" }}>
+                      Our Product and Services (Carousel Section)
+                    </h2>
+                    <p style={{ color: "var(--admin-text-muted)", fontSize: "0.825rem", marginTop: "0.25rem" }}>
+                      Controls the eyebrow and headline above the interactive services carousel on the home page.
+                    </p>
+                  </div>
+                  <Link
+                    href="/admin/services"
+                    className="admin-btn admin-btn-sm admin-btn-secondary"
+                    style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}
+                  >
+                    <Zap size={14} />
+                    <span>Manage Services Cards &rarr;</span>
+                  </Link>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                  <FormGroup
+                    label="Section Eyebrow"
+                    hint="Small badge text shown above the title (e.g. Our Product and Services)"
+                  >
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="Our Product and Services"
+                      value={data.services_eyebrow ?? ""}
+                      onChange={(e) => handleChange("services_eyebrow", e.target.value)}
+                    />
+                  </FormGroup>
+
+                  <FormGroup
+                    label="Section Main Headline"
+                    hint="Headline for the services carousel (e.g. Committed to Empower Your Vision)"
+                  >
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="Committed to Empower Your Vision"
+                      value={data.services_title ?? ""}
+                      onChange={(e) => handleChange("services_title", e.target.value)}
+                    />
+                  </FormGroup>
+                </div>
+
+                <div
+                  style={{
+                    background: "rgba(99, 102, 241, 0.08)",
+                    border: "1px solid rgba(99, 102, 241, 0.25)",
+                    borderRadius: "8px",
+                    padding: "0.85rem 1rem",
+                    fontSize: "0.85rem",
+                    color: "var(--admin-text-muted)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginTop: "0.75rem",
+                    gap: "1rem",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span style={{ flex: 1 }}>
+                    💡 <strong>Where to edit the individual carousel cards?</strong> The titles, summaries (<em>Software Development</em>, <em>IT Consultancy</em>, <em>System Integration</em>, <em>Cloud &amp; Infrastructure</em>), and icons inside this slider are managed under <strong>Services Management</strong>.
+                  </span>
+                  <Link href="/admin/services" className="admin-btn admin-btn-sm admin-btn-primary" style={{ whiteSpace: "nowrap" }}>
+                    Open Services Management
+                  </Link>
+                </div>
+              </div>
+
+              {/* Sectors Section */}
+              <div className="admin-card" style={{ marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <div>
+                    <h2 className="admin-card-title" style={{ fontSize: "1.1rem" }}>
+                      Who We Serve (Sectors Section)
+                    </h2>
+                    <p style={{ color: "var(--admin-text-muted)", fontSize: "0.825rem", marginTop: "0.25rem" }}>
+                      Controls the section heading above the industry sectors showcase.
+                    </p>
+                  </div>
+                  <Link
+                    href="/admin/sectors"
+                    className="admin-btn admin-btn-sm admin-btn-secondary"
+                    style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}
+                  >
+                    <Globe size={14} />
+                    <span>Manage Sectors Cards &rarr;</span>
+                  </Link>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                  <FormGroup label="Sectors Eyebrow" hint="e.g. Who We Serve">
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="Who We Serve"
+                      value={data.sectors_eyebrow ?? ""}
+                      onChange={(e) => handleChange("sectors_eyebrow", e.target.value)}
+                    />
+                  </FormGroup>
+
+                  <FormGroup label="Sectors Headline" hint="e.g. Our Services: Crafted to Empower Your Vision">
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="Our Services: Crafted to Empower Your Vision"
+                      value={data.sectors_title ?? ""}
+                      onChange={(e) => handleChange("sectors_title", e.target.value)}
+                    />
+                  </FormGroup>
+                </div>
+              </div>
+
+              {/* Why Choose Us Section */}
+              <div className="admin-card" style={{ marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <div>
+                    <h2 className="admin-card-title" style={{ fontSize: "1.1rem" }}>
+                      Why Choose Agrani Section
+                    </h2>
+                    <p style={{ color: "var(--admin-text-muted)", fontSize: "0.825rem", marginTop: "0.25rem" }}>
+                      Controls the headline and action button for the Why Choose Agrani section.
+                    </p>
+                  </div>
+                  <Link
+                    href="/admin/why-choose-us"
+                    className="admin-btn admin-btn-sm admin-btn-secondary"
+                    style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}
+                  >
+                    <Sparkles size={14} />
+                    <span>Manage Why Choose Points &rarr;</span>
+                  </Link>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                  <FormGroup label="Section Eyebrow" hint="e.g. Why Choose Agrani">
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="Why Choose Agrani"
+                      value={data.why_choose_us_eyebrow ?? ""}
+                      onChange={(e) => handleChange("why_choose_us_eyebrow", e.target.value)}
+                    />
+                  </FormGroup>
+
+                  <FormGroup label="Section Headline" hint="Headline text for this section">
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="Delivering trusted solutions with quality, innovation..."
+                      value={data.why_choose_us_title ?? ""}
+                      onChange={(e) => handleChange("why_choose_us_title", e.target.value)}
+                    />
+                  </FormGroup>
+
+                  <FormGroup label="Action Button Label" hint="Button text">
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="Contact Us"
+                      value={data.why_choose_us_cta_text ?? ""}
+                      onChange={(e) => handleChange("why_choose_us_cta_text", e.target.value)}
+                    />
+                  </FormGroup>
+
+                  <FormGroup label="Action Button Target URL" hint="Target link URL">
+                    <input
+                      type="text"
+                      className="admin-input"
+                      placeholder="/contact"
+                      value={data.why_choose_us_cta_url ?? ""}
+                      onChange={(e) => handleChange("why_choose_us_cta_url", e.target.value)}
+                    />
+                  </FormGroup>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* 2. ABOUT PAGE SPECIAL SECTIONS */}
           {activeTab === "about-page" && (

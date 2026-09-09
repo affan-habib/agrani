@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { caseStudiesApi } from "@/lib/admin-api/resources";
-import { CaseStudyResource, UpdateCaseStudyRequest } from "@/types/admin";
+import { caseStudiesApi, caseStudyTagsApi, sectorsApi } from "@/lib/admin-api/resources";
+import { CaseStudyResource, CaseStudyTagResource, SectorResource, UpdateCaseStudyRequest } from "@/types/admin";
 import { useToast } from "@/components/admin/ToastNotification";
 import { FormGroup } from "@/components/admin/FormControls";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
+import { TagManagerModal } from "@/components/admin/TagManagerModal";
+import { Bookmark, Plus } from "lucide-react";
 
 export default function EditCaseStudyPage() {
   const params = useParams();
@@ -18,24 +20,36 @@ export default function EditCaseStudyPage() {
 
   const [study, setStudy] = useState<CaseStudyResource | null>(null);
   const [form, setForm] = useState<UpdateCaseStudyRequest>({});
+  const [availableTags, setAvailableTags] = useState<CaseStudyTagResource[]>([]);
+  const [availableSectors, setAvailableSectors] = useState<SectorResource[]>([]);
+  const [tagModalOpen, setTagModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    async function loadStudy() {
+    async function loadData() {
       try {
-        const data = await caseStudiesApi.get(id);
+        const [data, tagsRes, sectorsRes] = await Promise.all([
+          caseStudiesApi.get(id),
+          caseStudyTagsApi.list().catch(() => ({ data: [] })),
+          sectorsApi.list().catch(() => ({ data: [] })),
+        ]);
         setStudy(data);
+        setAvailableTags(tagsRes.data || []);
+        setAvailableSectors(sectorsRes.data || []);
         setForm({
           title: data.title,
           slug: data.slug,
           client_name: data.client_name || "",
+          sector_id: data.sector_id ?? undefined,
+          tag_ids: data.tags?.map((t) => t.id) ?? data.tag_ids ?? [],
           excerpt: data.excerpt || "",
           challenge: data.challenge || "",
           solution: data.solution || "",
           result: data.result || "",
           featured_media_id: data.featured_media_id,
           status: data.status,
+          is_featured: data.is_featured ?? false,
         });
       } catch (err: any) {
         showToast(err.message || "Failed to load case study", "error");
@@ -43,8 +57,17 @@ export default function EditCaseStudyPage() {
         setLoading(false);
       }
     }
-    loadStudy();
+    loadData();
   }, [id, showToast]);
+
+  const toggleTag = (tagId: number) => {
+    const current = (form.tag_ids as number[]) || [];
+    if (current.includes(tagId)) {
+      setForm({ ...form, tag_ids: current.filter((t) => t !== tagId) });
+    } else {
+      setForm({ ...form, tag_ids: [...current, tagId] });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,13 +130,96 @@ export default function EditCaseStudyPage() {
             </FormGroup>
           </div>
 
-          <FormGroup label="Excerpt / Summary">
-            <textarea
-              className="admin-textarea"
-              value={form.excerpt || ""}
-              onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-            />
-          </FormGroup>
+          <div className="admin-form-grid-2">
+            <FormGroup label="Industry Sector" hint="Select related industry sector">
+              <select
+                className="admin-select"
+                value={form.sector_id || ""}
+                onChange={(e) => setForm({ ...form, sector_id: e.target.value ? Number(e.target.value) : undefined })}
+              >
+                <option value="">-- None / General --</option>
+                {availableSectors.map((s) => (
+                  <option key={s.id} value={s.id}>{s.title}</option>
+                ))}
+              </select>
+            </FormGroup>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", paddingTop: "1.75rem" }}>
+              <input
+                type="checkbox"
+                id="is_featured"
+                checked={!!form.is_featured}
+                onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
+                style={{ width: 18, height: 18, cursor: "pointer" }}
+              />
+              <label htmlFor="is_featured" style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--admin-text-main)", cursor: "pointer" }}>
+                Feature on Public Portfolio
+              </label>
+            </div>
+          </div>
+
+          {/* Tag Selection with In-Modal Management */}
+          <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid var(--admin-border)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+              <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--admin-text-main)" }}>
+                Project Tags
+              </label>
+              <button
+                type="button"
+                onClick={() => setTagModalOpen(true)}
+                className="admin-btn admin-btn-sm admin-btn-secondary"
+                style={{ fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "0.35rem", padding: "0.25rem 0.6rem" }}
+              >
+                <Bookmark size={13} />
+                <span>+ Manage / Add Tags</span>
+              </button>
+            </div>
+            <p style={{ fontSize: "0.78rem", color: "var(--admin-text-muted)", marginBottom: "0.75rem" }}>
+              Click on tags to toggle them on or off for this case study.
+            </p>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {availableTags.length === 0 ? (
+                <div style={{ fontSize: "0.825rem", color: "var(--admin-text-muted)" }}>
+                  No tags yet. Click <strong>+ Manage / Add Tags</strong> above to create some in a modal.
+                </div>
+              ) : (
+                availableTags.map((t) => {
+                  const active = ((form.tag_ids as number[]) || []).includes(t.id);
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => toggleTag(t.id)}
+                      style={{
+                        padding: "0.35rem 0.75rem",
+                        borderRadius: "20px",
+                        fontSize: "0.8rem",
+                        fontWeight: 500,
+                        cursor: "pointer",
+                        border: active ? "1.5px solid var(--admin-accent)" : "1px solid var(--admin-border)",
+                        background: active ? "rgba(99, 102, 241, 0.15)" : "var(--admin-surface)",
+                        color: active ? "var(--admin-accent)" : "var(--admin-text-muted)",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      {active ? "✓ " : "#"}{t.name}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          <div style={{ marginTop: "1rem" }}>
+            <FormGroup label="Excerpt / Summary">
+              <textarea
+                className="admin-textarea"
+                value={form.excerpt || ""}
+                onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+              />
+            </FormGroup>
+          </div>
 
           <MediaUploadField
             label="Featured Showcase Image"
@@ -156,6 +262,13 @@ export default function EditCaseStudyPage() {
           </button>
         </div>
       </form>
+
+      {/* Tag Manager Modal */}
+      <TagManagerModal
+        isOpen={tagModalOpen}
+        onClose={() => setTagModalOpen(false)}
+        onTagsChange={(newTags) => setAvailableTags(newTags)}
+      />
     </div>
   );
 }
