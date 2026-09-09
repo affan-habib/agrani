@@ -21,14 +21,30 @@ export default function CompanyTeamAdminPage() {
   const [caps, setCaps] = useState<CompanyCapabilityResource[]>([]);
   const [metrics, setMetrics] = useState<MetricResource[]>([]);
 
-  // Simple Add Modals state
+  // Simple Add/Edit Modals state
   const [addModal, setAddModal] = useState(false);
   const [editingLeader, setEditingLeader] = useState<LeadershipMemberResource | null>(null);
+  const [editingMetric, setEditingMetric] = useState<MetricResource | null>(null);
+  const [editingValue, setEditingValue] = useState<CompanyValueResource | null>(null);
+  const [editingCap, setEditingCap] = useState<CompanyCapabilityResource | null>(null);
+
   const [leaderForm, setLeaderForm] = useState<{ full_name: string; designation: string; short_bio: string; profile_media_id?: number | null }>({ full_name: "", designation: "", short_bio: "", profile_media_id: null });
   const [valueForm, setValueForm] = useState({ title: "", description: "" });
   const [capForm, setCapForm] = useState({ title: "", description: "" });
   const [metricForm, setMetricForm] = useState({ label: "", value: "", suffix: "" });
   const [deleteData, setDeleteData] = useState<{ id: number; type: string } | null>(null);
+
+  const resetForms = useCallback(() => {
+    setAddModal(false);
+    setEditingLeader(null);
+    setEditingMetric(null);
+    setEditingValue(null);
+    setEditingCap(null);
+    setLeaderForm({ full_name: "", designation: "", short_bio: "", profile_media_id: null });
+    setValueForm({ title: "", description: "" });
+    setCapForm({ title: "", description: "" });
+    setMetricForm({ label: "", value: "", suffix: "" });
+  }, []);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -68,30 +84,37 @@ export default function CompanyTeamAdminPage() {
           await leadershipApi.create(leaderForm);
           showToast("Leadership member added successfully", "success");
         }
-      }
-      else if (tab === "values") {
-        await companyValuesApi.create(valueForm);
-        showToast("Record added successfully", "success");
-      }
-      else if (tab === "capabilities") {
-        await companyCapabilitiesApi.create(capForm);
-        showToast("Record added successfully", "success");
-      }
-      else if (tab === "metrics") {
-        const key = metricForm.label.toLowerCase().replace(/[^a-z0-9]+/g, "-") || `metric-${Date.now()}`;
-        await metricsApi.create({ ...metricForm, key });
-        showToast("Record added successfully", "success");
+      } else if (tab === "values") {
+        if (editingValue) {
+          await companyValuesApi.update(editingValue.id, valueForm);
+          showToast("Company value updated successfully", "success");
+        } else {
+          await companyValuesApi.create(valueForm);
+          showToast("Record added successfully", "success");
+        }
+      } else if (tab === "capabilities") {
+        if (editingCap) {
+          await companyCapabilitiesApi.update(editingCap.id, capForm);
+          showToast("Capability updated successfully", "success");
+        } else {
+          await companyCapabilitiesApi.create(capForm);
+          showToast("Record added successfully", "success");
+        }
+      } else if (tab === "metrics") {
+        if (editingMetric) {
+          await metricsApi.update(editingMetric.id, metricForm);
+          showToast("Proof metric updated successfully", "success");
+        } else {
+          const key = metricForm.label.toLowerCase().replace(/[^a-z0-9]+/g, "-") || `metric-${Date.now()}`;
+          await metricsApi.create({ ...metricForm, key });
+          showToast("Proof metric added successfully", "success");
+        }
       }
 
-      setAddModal(false);
-      setEditingLeader(null);
-      setLeaderForm({ full_name: "", designation: "", short_bio: "", profile_media_id: null });
-      setValueForm({ title: "", description: "" });
-      setCapForm({ title: "", description: "" });
-      setMetricForm({ label: "", value: "", suffix: "" });
+      resetForms();
       loadData();
     } catch (err: any) {
-      showToast(err.message || "Failed to add record", "error");
+      showToast(err.message || "Operation failed", "error");
     }
   };
 
@@ -236,11 +259,24 @@ export default function CompanyTeamAdminPage() {
             {
               header: "Actions",
               render: (item: any) => (
-                <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setDeleteData({ id: item.id, type: "values" })}>
-                  Delete
-                </button>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-sm admin-btn-secondary"
+                    onClick={() => {
+                      setEditingValue(item);
+                      setValueForm({ title: item.title || "", description: item.description || "" });
+                      setAddModal(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setDeleteData({ id: item.id, type: "values" })}>
+                    Delete
+                  </button>
+                </div>
               ),
-              width: "100px",
+              width: "140px",
             },
           ]}
           data={values}
@@ -256,11 +292,24 @@ export default function CompanyTeamAdminPage() {
             {
               header: "Actions",
               render: (item: any) => (
-                <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setDeleteData({ id: item.id, type: "capabilities" })}>
-                  Delete
-                </button>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-sm admin-btn-secondary"
+                    onClick={() => {
+                      setEditingCap(item);
+                      setCapForm({ title: item.title || "", description: item.description || "" });
+                      setAddModal(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setDeleteData({ id: item.id, type: "capabilities" })}>
+                    Delete
+                  </button>
+                </div>
               ),
-              width: "100px",
+              width: "140px",
             },
           ]}
           data={caps}
@@ -276,11 +325,28 @@ export default function CompanyTeamAdminPage() {
             {
               header: "Actions",
               render: (item: any) => (
-                <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setDeleteData({ id: item.id, type: "metrics" })}>
-                  Delete
-                </button>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-sm admin-btn-secondary"
+                    onClick={() => {
+                      setEditingMetric(item);
+                      setMetricForm({
+                        label: item.label || "",
+                        value: item.value || "",
+                        suffix: item.suffix || "",
+                      });
+                      setAddModal(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setDeleteData({ id: item.id, type: "metrics" })}>
+                    Delete
+                  </button>
+                </div>
               ),
-              width: "100px",
+              width: "140px",
             },
           ]}
           data={metrics}
@@ -288,13 +354,23 @@ export default function CompanyTeamAdminPage() {
         />
       )}
 
-      {/* Add Modal */}
+      {/* Add / Edit Modal */}
       {addModal && (
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: 480 }}>
             <div className="admin-modal-header">
-              <h3 className="admin-card-title">{editingLeader ? `Edit ${editingLeader.full_name}` : `Add ${tab.toUpperCase()}`}</h3>
-              <button onClick={() => { setAddModal(false); setEditingLeader(null); }} style={{ color: "#8b9baa", fontSize: "1.1rem" }}>✕</button>
+              <h3 className="admin-card-title">
+                {editingLeader
+                  ? `Edit ${editingLeader.full_name}`
+                  : editingMetric
+                  ? `Edit Metric: ${editingMetric.label}`
+                  : editingValue
+                  ? `Edit Value: ${editingValue.title}`
+                  : editingCap
+                  ? `Edit Capability: ${editingCap.title}`
+                  : `Add ${tab === "metrics" ? "Proof Metric" : tab === "values" ? "Company Value" : tab === "capabilities" ? "Capability" : "Leadership Member"}`}
+              </h3>
+              <button onClick={resetForms} style={{ color: "#8b9baa", fontSize: "1.1rem" }}>✕</button>
             </div>
             <form onSubmit={handleCreate}>
               <div className="admin-modal-body">
@@ -353,8 +429,10 @@ export default function CompanyTeamAdminPage() {
                 )}
               </div>
               <div className="admin-modal-footer">
-                <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setAddModal(false)}>Cancel</button>
-                <button type="submit" className="admin-btn admin-btn-primary">Save Record</button>
+                <button type="button" className="admin-btn admin-btn-secondary" onClick={resetForms}>Cancel</button>
+                <button type="submit" className="admin-btn admin-btn-primary">
+                  {editingLeader || editingMetric || editingValue || editingCap ? "Save Changes" : "Save Record"}
+                </button>
               </div>
             </form>
           </div>
