@@ -16,17 +16,20 @@ import {
 const PROHIBITED_KEYS = new Set([
   "id",
   "key",
+  "status",
   "updated_by",
   "created_at",
   "updated_at",
   "media",
   "hero_media",
   "background_media",
+  "featured_media",
+  "purpose_media",
+  "director_leadership_member",
   "logo",
   "favicon",
   "footer_image",
   "default_og_image",
-  "hero_steps",
   "author",
   "department",
 ]);
@@ -40,6 +43,44 @@ function cleanSingletonPayload<T extends Record<string, any>>(data: T): Partial<
       cleaned[k] = v;
     }
   }
+
+  // Sanitize mission_points for About Page:
+  // Laravel validator enforces 'mission_points.*' => ['array:description,sort_order'].
+  // Sending 'id' triggers "The mission_points.0 field must be an array." validation error.
+  if (Array.isArray(cleaned.mission_points)) {
+    cleaned.mission_points = cleaned.mission_points
+      .filter((mp: any) => mp && (typeof mp === "string" || mp.description))
+      .map((mp: any, idx: number) => ({
+        description: typeof mp === "string" ? mp.trim() : String(mp.description || "").trim(),
+        sort_order: typeof mp?.sort_order === "number" ? mp.sort_order : idx,
+      }));
+  }
+
+  // Sanitize hero_steps for Home Page:
+  // Laravel validator enforces 'hero_steps.*' => ['array:label,sort_order'].
+  if (Array.isArray(cleaned.hero_steps)) {
+    cleaned.hero_steps = cleaned.hero_steps
+      .filter((hs: any) => hs && (typeof hs === "string" || hs.label))
+      .map((hs: any, idx: number) => ({
+        label: typeof hs === "string" ? hs.trim() : String(hs.label || "").trim(),
+        sort_order: typeof hs?.sort_order === "number" ? hs.sort_order : idx,
+      }));
+  }
+
+  // Sanitize social_links for Site Settings:
+  if (Array.isArray(cleaned.social_links)) {
+    cleaned.social_links = cleaned.social_links
+      .filter((sl: any) => sl && sl.channel && sl.url)
+      .map((sl: any, idx: number) => ({
+        channel: sl.channel,
+        label: sl.label || sl.channel,
+        url: sl.url,
+        ...(sl.icon_key ? { icon_key: sl.icon_key } : {}),
+        ...(typeof sl.is_active === "boolean" ? { is_active: sl.is_active } : {}),
+        sort_order: typeof sl.sort_order === "number" ? sl.sort_order : idx,
+      }));
+  }
+
   return cleaned as Partial<T>;
 }
 

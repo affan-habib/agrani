@@ -7,6 +7,7 @@ import { caseStudiesApi } from "@/lib/admin-api/resources";
 import { StoreCaseStudyRequest } from "@/types/admin";
 import { useToast } from "@/components/admin/ToastNotification";
 import { FormGroup } from "@/components/admin/FormControls";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 export default function CreateCaseStudyPage() {
   const router = useRouter();
@@ -27,7 +28,10 @@ export default function CreateCaseStudyPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      await caseStudiesApi.create(form);
+      const created = await caseStudiesApi.create(form);
+      if (form.status === "published") {
+        await caseStudiesApi.publish(created.id);
+      }
       showToast("Case study created successfully!", "success");
       router.push("/admin/case-studies");
     } catch (err: any) {
@@ -92,6 +96,13 @@ export default function CreateCaseStudyPage() {
               onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
             />
           </FormGroup>
+
+          <MediaUploadField
+            label="Featured Showcase Image"
+            description="The primary project thumbnail displayed on case study cards and headers"
+            value={form.featured_media_id}
+            onChange={(mediaId) => setForm({ ...form, featured_media_id: mediaId })}
+          />
         </div>
 
         <div className="admin-card">

@@ -7,6 +7,7 @@ import { blogPostsApi } from "@/lib/admin-api/resources";
 import { StoreBlogPostRequest } from "@/types/admin";
 import { useToast } from "@/components/admin/ToastNotification";
 import { FormGroup } from "@/components/admin/FormControls";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 export default function CreateBlogPostPage() {
   const router = useRouter();
@@ -28,6 +29,9 @@ export default function CreateBlogPostPage() {
     setSaving(true);
     try {
       const created = await blogPostsApi.create(form);
+      if (form.status === "published") {
+        await blogPostsApi.publish(created.id);
+      }
       showToast("Blog post created successfully!", "success");
       router.push("/admin/blog");
     } catch (err: any) {
@@ -78,6 +82,13 @@ export default function CreateBlogPostPage() {
               placeholder="scaling-enterprise-microservices"
             />
           </FormGroup>
+
+          <MediaUploadField
+            label="Featured Cover Image"
+            description="The primary banner image displayed on the blog post header and cards"
+            value={form.featured_media_id}
+            onChange={(mediaId) => setForm({ ...form, featured_media_id: mediaId })}
+          />
 
           <FormGroup label="Short Excerpt" required>
             <textarea

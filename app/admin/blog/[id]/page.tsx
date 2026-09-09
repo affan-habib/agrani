@@ -9,6 +9,7 @@ import { useToast } from "@/components/admin/ToastNotification";
 import { FormGroup } from "@/components/admin/FormControls";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { StatusActions } from "@/components/admin/StatusActions";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 export default function EditBlogPostPage() {
   const params = useParams();
@@ -33,6 +34,7 @@ export default function EditBlogPostPage() {
           body: data.body || "",
           status: data.status,
           is_featured: data.is_featured,
+          featured_media_id: data.featured_media_id,
           seo_title: data.seo_title || "",
           seo_description: data.seo_description || "",
         });
@@ -113,6 +115,14 @@ export default function EditBlogPostPage() {
               onChange={(e) => setForm({ ...form, slug: e.target.value })}
             />
           </FormGroup>
+
+          <MediaUploadField
+            label="Featured Cover Image"
+            description="The primary banner image displayed on the blog post header and cards"
+            value={form.featured_media_id}
+            initialMedia={post?.featured_media}
+            onChange={(mediaId) => setForm({ ...form, featured_media_id: mediaId })}
+          />
 
           <FormGroup label="Short Excerpt" required>
             <textarea

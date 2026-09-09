@@ -24,7 +24,10 @@ export default function CreateServicePage() {
     e.preventDefault();
     setSaving(true);
     try {
-      await servicesApi.create(form);
+      const created = await servicesApi.create(form);
+      if (form.status === "published") {
+        await servicesApi.publish(created.id);
+      }
       showToast("Service created successfully!", "success");
       router.push("/admin/services");
     } catch (err: any) {

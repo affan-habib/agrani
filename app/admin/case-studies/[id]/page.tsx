@@ -8,6 +8,7 @@ import { CaseStudyResource, UpdateCaseStudyRequest } from "@/types/admin";
 import { useToast } from "@/components/admin/ToastNotification";
 import { FormGroup } from "@/components/admin/FormControls";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 export default function EditCaseStudyPage() {
   const params = useParams();
@@ -33,6 +34,7 @@ export default function EditCaseStudyPage() {
           challenge: data.challenge || "",
           solution: data.solution || "",
           result: data.result || "",
+          featured_media_id: data.featured_media_id,
           status: data.status,
         });
       } catch (err: any) {
@@ -112,6 +114,14 @@ export default function EditCaseStudyPage() {
               onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
             />
           </FormGroup>
+
+          <MediaUploadField
+            label="Featured Showcase Image"
+            description="The primary project thumbnail displayed on case study cards and headers"
+            value={form.featured_media_id}
+            initialMedia={study?.featured_media}
+            onChange={(mediaId) => setForm({ ...form, featured_media_id: mediaId })}
+          />
         </div>
 
         <div className="admin-card">

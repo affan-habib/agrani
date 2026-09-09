@@ -9,7 +9,7 @@ test.describe('Admin Page Content Editors (Tabbed)', () => {
   });
 
   test('Tab bar renders all 9 page tabs', async ({ page }) => {
-    await expect(page.locator('button:has-text("Home Page")')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Home Page', exact: true })).toBeVisible();
     await expect(page.locator('button:has-text("About Us")')).toBeVisible();
     await expect(page.locator('button:has-text("Products & Services")')).toBeVisible();
     await expect(page.locator('button:has-text("Expertise")')).toBeVisible();
@@ -53,5 +53,17 @@ test.describe('Admin Page Content Editors (Tabbed)', () => {
 
     await page.reload();
     await expect(heroHeadline).toHaveValue('Playwright Test Headline', { timeout: 10000 });
+  });
+
+  test('About Us page: Mutate mission points and save successfully without validation errors', async ({ page }) => {
+    await page.click('button:has-text("About Us")');
+    await expect(page).toHaveURL(/tab=about-page/, { timeout: 8000 });
+    await expect(page.locator('text=Mission Bullet Points (Key Objectives)')).toBeVisible({ timeout: 8000 });
+
+    // Click Save Page Content
+    await page.click('button:has-text("Save Page Content")');
+    await expect(page.locator('text=Page content saved successfully!')).toBeVisible({ timeout: 10000 });
+    // Ensure no validation error toast appears
+    await expect(page.locator('text=The mission_points')).not.toBeVisible();
   });
 });

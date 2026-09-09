@@ -15,6 +15,12 @@ const tabLabels: Record<AboutTab, string> = {
   values: "Our Values",
 };
 
+const directorFallbacks = [
+  "/assets/figma/about/04.png", // Kamrul Islam (Managing Director)
+  "/assets/figma/about/03.png", // Tanvir Mosaddaque (Executive Director)
+  "/assets/figma/about/01.png", // Hassan Shahid Sarwar FCA (Finance Director)
+];
+
 function DirectorRow({ member, title, message, index }: {
   member: LeadershipMember;
   title?: string | null;
@@ -42,6 +48,7 @@ function DirectorRow({ member, title, message, index }: {
           height={590}
           alt={member.full_name}
           className="director-photo"
+          decorativeFallback={directorFallbacks[index % directorFallbacks.length]}
         />
       </div>
     </motion.div>
@@ -89,7 +96,14 @@ export function AboutContent({ data, initialTab }: { data: AboutPageData; initia
       />
 
       <section className="about-hero container">
-        <ContentImage media={data.overview.featured_media} fill sizes="(max-width: 900px) 100vw, 1240px" alt={data.overview.title || ""} priority />
+        <ContentImage
+          media={data.overview.featured_media}
+          fill
+          sizes="(max-width: 900px) 100vw, 1240px"
+          alt={data.overview.title || ""}
+          priority
+          decorativeFallback="/assets/figma/about/09.jpeg"
+        />
       </section>
 
       <section className="directors-section container">

@@ -7,6 +7,8 @@ import { DataTable, Column } from "@/components/admin/DataTable";
 import { useToast } from "@/components/admin/ToastNotification";
 import { FormGroup } from "@/components/admin/FormControls";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
+import Image from "next/image";
 
 export default function CompanyTeamAdminPage() {
   const { showToast } = useToast();
@@ -21,7 +23,8 @@ export default function CompanyTeamAdminPage() {
 
   // Simple Add Modals state
   const [addModal, setAddModal] = useState(false);
-  const [leaderForm, setLeaderForm] = useState({ full_name: "", designation: "", short_bio: "" });
+  const [editingLeader, setEditingLeader] = useState<LeadershipMemberResource | null>(null);
+  const [leaderForm, setLeaderForm] = useState<{ full_name: string; designation: string; short_bio: string; profile_media_id?: number | null }>({ full_name: "", designation: "", short_bio: "", profile_media_id: null });
   const [valueForm, setValueForm] = useState({ title: "", description: "" });
   const [capForm, setCapForm] = useState({ title: "", description: "" });
   const [metricForm, setMetricForm] = useState({ label: "", value: "", suffix: "" });
@@ -57,17 +60,32 @@ export default function CompanyTeamAdminPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (tab === "leadership") await leadershipApi.create(leaderForm);
-      else if (tab === "values") await companyValuesApi.create(valueForm);
-      else if (tab === "capabilities") await companyCapabilitiesApi.create(capForm);
+      if (tab === "leadership") {
+        if (editingLeader) {
+          await leadershipApi.update(editingLeader.id, leaderForm);
+          showToast("Leadership member updated successfully", "success");
+        } else {
+          await leadershipApi.create(leaderForm);
+          showToast("Leadership member added successfully", "success");
+        }
+      }
+      else if (tab === "values") {
+        await companyValuesApi.create(valueForm);
+        showToast("Record added successfully", "success");
+      }
+      else if (tab === "capabilities") {
+        await companyCapabilitiesApi.create(capForm);
+        showToast("Record added successfully", "success");
+      }
       else if (tab === "metrics") {
         const key = metricForm.label.toLowerCase().replace(/[^a-z0-9]+/g, "-") || `metric-${Date.now()}`;
         await metricsApi.create({ ...metricForm, key });
+        showToast("Record added successfully", "success");
       }
 
-      showToast("Record added successfully", "success");
       setAddModal(false);
-      setLeaderForm({ full_name: "", designation: "", short_bio: "" });
+      setEditingLeader(null);
+      setLeaderForm({ full_name: "", designation: "", short_bio: "", profile_media_id: null });
       setValueForm({ title: "", description: "" });
       setCapForm({ title: "", description: "" });
       setMetricForm({ label: "", value: "", suffix: "" });
@@ -102,7 +120,15 @@ export default function CompanyTeamAdminPage() {
             Leadership board, corporate values, technical capabilities, and impact metrics
           </p>
         </div>
-        <button type="button" className="admin-btn admin-btn-primary" onClick={() => setAddModal(true)}>
+        <button
+          type="button"
+          className="admin-btn admin-btn-primary"
+          onClick={() => {
+            setEditingLeader(null);
+            setLeaderForm({ full_name: "", designation: "", short_bio: "", profile_media_id: null });
+            setAddModal(true);
+          }}
+        >
           + Add New {tab.slice(0, -1).toUpperCase()}
         </button>
       </div>
@@ -137,17 +163,64 @@ export default function CompanyTeamAdminPage() {
       {tab === "leadership" && (
         <DataTable
           columns={[
-            { header: "Full Name", render: (item: any) => <span style={{ fontWeight: 600 }}>{item.full_name}</span> },
-            { header: "Designation", accessor: "designation" },
+            {
+              header: "Member",
+              render: (item: any) => (
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <div
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      backgroundColor: "rgba(255,255,255,0.06)",
+                      position: "relative",
+                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {item.profile_media?.url ? (
+                      <Image src={item.profile_media.url} alt="" fill style={{ objectFit: "cover" }} unoptimized />
+                    ) : (
+                      <span style={{ fontSize: "1rem" }}>👤</span>
+                    )}
+                  </div>
+                  <div>
+                    <span style={{ fontWeight: 600, display: "block" }}>{item.full_name}</span>
+                    <span style={{ fontSize: "0.75rem", color: "var(--admin-text-muted)" }}>{item.designation}</span>
+                  </div>
+                </div>
+              ),
+            },
             { header: "Bio Summary", accessor: "short_bio" },
             {
               header: "Actions",
               render: (item: any) => (
-                <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setDeleteData({ id: item.id, type: "leadership" })}>
-                  Delete
-                </button>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-sm admin-btn-secondary"
+                    onClick={() => {
+                      setEditingLeader(item);
+                      setLeaderForm({
+                        full_name: item.full_name,
+                        designation: item.designation,
+                        short_bio: item.short_bio || "",
+                        profile_media_id: item.profile_media_id || null,
+                      });
+                      setAddModal(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setDeleteData({ id: item.id, type: "leadership" })}>
+                    Delete
+                  </button>
+                </div>
               ),
-              width: "100px",
+              width: "140px",
             },
           ]}
           data={leaders}
@@ -220,13 +293,20 @@ export default function CompanyTeamAdminPage() {
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: 480 }}>
             <div className="admin-modal-header">
-              <h3 className="admin-card-title">Add {tab.toUpperCase()}</h3>
-              <button onClick={() => setAddModal(false)} style={{ color: "#8b9baa", fontSize: "1.1rem" }}>✕</button>
+              <h3 className="admin-card-title">{editingLeader ? `Edit ${editingLeader.full_name}` : `Add ${tab.toUpperCase()}`}</h3>
+              <button onClick={() => { setAddModal(false); setEditingLeader(null); }} style={{ color: "#8b9baa", fontSize: "1.1rem" }}>✕</button>
             </div>
             <form onSubmit={handleCreate}>
               <div className="admin-modal-body">
                 {tab === "leadership" && (
                   <>
+                    <MediaUploadField
+                      label="Profile Photo"
+                      description="Upload director headshot picture"
+                      value={leaderForm.profile_media_id}
+                      initialMedia={editingLeader?.profile_media}
+                      onChange={(mediaId) => setLeaderForm({ ...leaderForm, profile_media_id: mediaId })}
+                    />
                     <FormGroup label="Full Name" required>
                       <input type="text" required className="admin-input" value={leaderForm.full_name} onChange={(e) => setLeaderForm({ ...leaderForm, full_name: e.target.value })} />
                     </FormGroup>

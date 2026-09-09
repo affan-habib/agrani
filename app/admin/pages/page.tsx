@@ -18,6 +18,9 @@ import {
   Save,
   Loader2,
 } from "lucide-react";
+import { leadershipApi } from "@/lib/admin-api/resources";
+import { LeadershipMemberResource } from "@/types/admin";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 const PAGES_CONFIG = [
   { slug: "home-page", title: "Home Page", icon: Home, subtitle: "Hero banner, review badges, and section headings" },
@@ -39,6 +42,7 @@ export default function AdminPagesManager() {
   const initialTab = searchParams.get("tab") || "home-page";
   const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [data, setData] = useState<any>({});
+  const [leaders, setLeaders] = useState<LeadershipMemberResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -47,7 +51,10 @@ export default function AdminPagesManager() {
     try {
       let res: any = {};
       if (slug === "home-page") res = await singletonsApi.getHomePage();
-      else if (slug === "about-page") res = await singletonsApi.getAboutPage();
+      else if (slug === "about-page") {
+        res = await singletonsApi.getAboutPage();
+        leadershipApi.list().then((l) => setLeaders(l.data || [])).catch(() => {});
+      }
       else if (slug === "product-services-page") res = await singletonsApi.getProductServicesPage();
       else if (slug === "expertise-page") res = await singletonsApi.getExpertisePage();
       else if (slug === "customer-experience-page") res = await singletonsApi.getCustomerExperiencePage();
@@ -240,6 +247,26 @@ export default function AdminPagesManager() {
               />
             </FormGroup>
 
+            {activeTab === "about-page" && (
+              <MediaUploadField
+                label="About Page Hero Banner"
+                description="The main featured header artwork on the About Us page"
+                value={data.featured_media_id}
+                initialMedia={data.featured_media}
+                onChange={(mediaId) => handleChange("featured_media_id", mediaId)}
+              />
+            )}
+
+            {activeTab === "home-page" && (
+              <MediaUploadField
+                label="Home Page Hero Media"
+                description="The primary showcase hero graphic on the Agrani home page"
+                value={data.featured_media_id}
+                initialMedia={data.featured_media}
+                onChange={(mediaId) => handleChange("featured_media_id", mediaId)}
+              />
+            )}
+
             {/* Home Page specific buttons */}
             {activeTab === "home-page" && (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "0.5rem" }}>
@@ -292,6 +319,43 @@ export default function AdminPagesManager() {
                 <h2 className="admin-card-title" style={{ marginBottom: "1.25rem", fontSize: "1.1rem" }}>
                   Director Keynote Speech
                 </h2>
+
+                <FormGroup
+                  label="Link Leadership Profile"
+                  hint="Select a director from the leadership roster to automatically link their photo and profile"
+                >
+                  <select
+                    className="admin-select"
+                    value={data.director_leadership_member_id || ""}
+                    onChange={(e) => {
+                      const id = e.target.value ? Number(e.target.value) : null;
+                      const selectedLeader = leaders.find((l) => l.id === id);
+                      if (selectedLeader) {
+                        setData((prev: any) => ({
+                          ...prev,
+                          director_leadership_member_id: selectedLeader.id,
+                          director_name: selectedLeader.full_name,
+                          director_designation: selectedLeader.designation,
+                          director_leadership_member: selectedLeader,
+                        }));
+                      } else {
+                        setData((prev: any) => ({
+                          ...prev,
+                          director_leadership_member_id: null,
+                          director_leadership_member: null,
+                        }));
+                      }
+                    }}
+                  >
+                    <option value="">-- Standalone (No profile linked) --</option>
+                    {leaders.map((leader) => (
+                      <option key={leader.id} value={leader.id}>
+                        {leader.full_name} ({leader.designation})
+                      </option>
+                    ))}
+                  </select>
+                </FormGroup>
+
                 <FormGroup label="Keynote Headline">
                   <input
                     type="text"
@@ -332,6 +396,13 @@ export default function AdminPagesManager() {
                 <h2 className="admin-card-title" style={{ marginBottom: "1.25rem", fontSize: "1.1rem" }}>
                   Mission &amp; Vision
                 </h2>
+                <MediaUploadField
+                  label="Purpose / Mission Graphic"
+                  description="Graphic displayed alongside the company Purpose, Mission & Vision"
+                  value={data.purpose_media_id}
+                  initialMedia={data.purpose_media}
+                  onChange={(mediaId) => handleChange("purpose_media_id", mediaId)}
+                />
                 <FormGroup label="Mission Statement">
                   <textarea
                     className="admin-textarea"
@@ -348,6 +419,70 @@ export default function AdminPagesManager() {
                     onChange={(e) => handleChange("vision", e.target.value)}
                   />
                 </FormGroup>
+
+                <div style={{ marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: "1px solid var(--admin-border)" }}>
+                  <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "var(--admin-text-main)", marginBottom: "0.25rem" }}>
+                    Mission Bullet Points (Key Objectives)
+                  </label>
+                  <p style={{ fontSize: "0.8rem", color: "var(--admin-text-muted)", marginBottom: "0.75rem" }}>
+                    Bulleted points rendered on the About page Mission &amp; Vision section.
+                  </p>
+                  {((data.mission_points as any[]) || []).map((point: any, idx: number) => (
+                    <div key={idx} style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem", alignItems: "center" }}>
+                      <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--admin-text-muted)", width: 20, textAlign: "right" }}>
+                        {idx + 1}.
+                      </span>
+                      <input
+                        type="text"
+                        className="admin-input"
+                        placeholder="Enter mission objective..."
+                        value={typeof point === "string" ? point : point?.description || ""}
+                        onChange={(e) => {
+                          const updated = [...((data.mission_points as any[]) || [])];
+                          updated[idx] = {
+                            description: e.target.value,
+                            sort_order: idx,
+                          };
+                          handleChange("mission_points", updated);
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = ((data.mission_points as any[]) || []).filter((_: any, i: number) => i !== idx);
+                          handleChange("mission_points", updated);
+                        }}
+                        style={{
+                          background: "none",
+                          border: "1px solid var(--admin-border)",
+                          borderRadius: 6,
+                          padding: "0.4rem 0.6rem",
+                          color: "var(--admin-danger)",
+                          cursor: "pointer",
+                          fontSize: "0.85rem",
+                          lineHeight: 1,
+                        }}
+                        title="Remove point"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const current = (data.mission_points as any[]) || [];
+                      handleChange("mission_points", [
+                        ...current,
+                        { description: "", sort_order: current.length },
+                      ]);
+                    }}
+                    className="admin-btn admin-btn-secondary"
+                    style={{ fontSize: "0.8rem", padding: "0.4rem 0.8rem", marginTop: "0.25rem" }}
+                  >
+                    + Add Mission Point
+                  </button>
+                </div>
               </div>
             </>
           )}

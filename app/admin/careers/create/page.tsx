@@ -31,7 +31,10 @@ export default function CreateJobPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      await careerJobsApi.create(form);
+      const created = await careerJobsApi.create(form);
+      if (form.status === "published") {
+        await careerJobsApi.publish(created.id);
+      }
       showToast("Job opening posted successfully!", "success");
       router.push("/admin/careers");
     } catch (err: any) {
