@@ -57,6 +57,7 @@ export function SiteHeader({
   branding?: SiteSettings["branding"];
   companyName?: string | null;
 }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [othersOpen, setOthersOpen] = useState(false);
   const desktopOthersRef = useRef<HTMLDivElement>(null);
@@ -64,6 +65,37 @@ export function SiteHeader({
 
   const logoUrl = resolveMediaUrl(branding?.logo, A + "/icons/logo-light.svg");
   const brandName = companyName || branding?.logo?.alt_text || "Agrani Technologies & Services Limited";
+
+  const otherSubmenuLinks = [
+    { label: "Case Studies", href: "/case-studies" },
+    { label: "Blogs", href: "/blog" },
+    { label: "Customer Experience", href: "/customer-experience" },
+    { label: "Our Expertise", href: "/expertise" },
+    { label: "Why Choose Us", href: "/why-choose-us" },
+  ];
+
+  const isSubmenuActive = (subHref: string) => {
+    if (!pathname) return false;
+    if (pathname === subHref) return true;
+    if (pathname.startsWith(`${subHref}/`)) return true;
+    if (subHref === "/blog" && pathname.startsWith("/blog-details")) return true;
+    if (subHref === "/case-studies" && pathname.startsWith("/case-study-details")) return true;
+    return false;
+  };
+
+  const isOthersActive = active === "Others" || otherSubmenuLinks.some((item) => isSubmenuActive(item.href));
+
+  const isMainLinkActive = (label: string, href: string) => {
+    if (label === "Others") {
+      return isOthersActive;
+    }
+    if (active) {
+      return active === label;
+    }
+    if (!pathname) return false;
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   useEffect(() => {
     if (!othersOpen) return;
@@ -125,12 +157,12 @@ export function SiteHeader({
           <div className="nav-dropdown" key={label} ref={desktopOthersRef}>
             <button
               type="button"
-              className={"nav-dropdown-trigger " + (active === label ? "active" : "")}
+              className={"nav-dropdown-trigger " + (isOthersActive ? "active" : "")}
               aria-expanded={othersOpen}
               aria-haspopup="menu"
               onClick={() => setOthersOpen((value) => !value)}
             >
-              {active === label && <i />}
+              {isOthersActive && <i />}
               {label}
               <b className={othersOpen ? "open" : ""}>⌄</b>
             </button>
@@ -144,18 +176,28 @@ export function SiteHeader({
                   className="nav-dropdown-menu"
                   role="menu"
                 >
-                  <Link href="/case-studies" role="menuitem" onClick={() => setOthersOpen(false)}>Case Studies</Link>
-                  <Link href="/blog" role="menuitem" onClick={() => setOthersOpen(false)}>Blogs</Link>
-                  <Link href="/customer-experience" role="menuitem" onClick={() => setOthersOpen(false)}>Customer Experience</Link>
-                  <Link href="/expertise" role="menuitem" onClick={() => setOthersOpen(false)}>Our Expertise</Link>
-                  <Link href="/why-choose-us" role="menuitem" onClick={() => setOthersOpen(false)}>Why Choose Us</Link>
+                  {otherSubmenuLinks.map((item) => {
+                    const isSelected = isSubmenuActive(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        role="menuitem"
+                        className={isSelected ? "active selected" : ""}
+                        onClick={() => setOthersOpen(false)}
+                      >
+                        <span>{item.label}</span>
+                        {isSelected && <i className="submenu-active-indicator" />}
+                      </Link>
+                    );
+                  })}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         ) : (
-          <Link className={active === label ? "active" : ""} href={href} key={label}>
-            {active === label && <i />}
+          <Link className={isMainLinkActive(label, href) ? "active" : ""} href={href} key={label}>
+            {isMainLinkActive(label, href) && <i />}
             {label}
           </Link>
         ))}
@@ -194,11 +236,11 @@ export function SiteHeader({
               <div className="mobile-nav-group" key={label} ref={mobileOthersRef}>
                 <button
                   type="button"
-                  className={"mobile-nav-parent " + (active === label ? "active" : "")}
+                  className={"mobile-nav-parent " + (isOthersActive ? "active" : "")}
                   aria-expanded={othersOpen}
                   onClick={() => setOthersOpen((value) => !value)}
                 >
-                  <span>{active === label && <i />}{label}</span>
+                  <span>{isOthersActive && <i />}{label}</span>
                   <b className={othersOpen ? "open" : ""}>⌄</b>
                 </button>
                 <AnimatePresence>
@@ -209,23 +251,35 @@ export function SiteHeader({
                       exit={{ height: 0, opacity: 0 }}
                       className="mobile-nav-submenu"
                     >
-                      <Link href="/case-studies" onClick={() => { setOpen(false); setOthersOpen(false); }}>Case Studies</Link>
-                      <Link href="/blog" onClick={() => { setOpen(false); setOthersOpen(false); }}>Blogs</Link>
-                      <Link href="/customer-experience" onClick={() => { setOpen(false); setOthersOpen(false); }}>Customer Experience</Link>
-                      <Link href="/expertise" onClick={() => { setOpen(false); setOthersOpen(false); }}>Our Expertise</Link>
-                      <Link href="/why-choose-us" onClick={() => { setOpen(false); setOthersOpen(false); }}>Why Choose Us</Link>
+                      {otherSubmenuLinks.map((item) => {
+                        const isSelected = isSubmenuActive(item.href);
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className={isSelected ? "active selected" : ""}
+                            onClick={() => {
+                              setOpen(false);
+                              setOthersOpen(false);
+                            }}
+                          >
+                            {isSelected && <i />}
+                            <span>{item.label}</span>
+                          </Link>
+                        );
+                      })}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ) : (
               <Link
-                className={active === label ? "active" : ""}
+                className={isMainLinkActive(label, href) ? "active" : ""}
                 href={href}
                 key={label}
                 onClick={() => setOpen(false)}
               >
-                {active === label && <i />}
+                {isMainLinkActive(label, href) && <i />}
                 {label}
               </Link>
             ))}
@@ -269,15 +323,36 @@ export function ContactBlock({ quote }: { quote?: QuoteContent }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    const firstName = form.firstName.trim();
+    const lastName = form.lastName.trim();
+    const message = form.message.trim();
+    const phoneClean = form.phone.replace(/[\s\-().]/g, "");
+
+    if (!firstName || !lastName) {
+      setError("Please provide both your first and last name.");
+      return;
+    }
+
+    if (phoneClean.length < 7 || !/^\+?[0-9]+$/.test(phoneClean)) {
+      setError("Please enter a valid phone number (e.g. +880 1712 345678).");
+      return;
+    }
+
+    if (message.length < 5) {
+      setError("Please provide a brief message describing your requirement.");
+      return;
+    }
+
+    setLoading(true);
     try {
       await publicApi.submitQuoteRequest({
-        first_name: form.firstName,
-        last_name: form.lastName,
-        phone: form.phone,
+        first_name: firstName,
+        last_name: lastName,
+        phone: form.phone.trim(),
         city: form.city,
-        message: form.message,
+        message,
         source_page: quote?.source_page || (typeof window !== "undefined" ? window.location.pathname : undefined),
       });
       setSubmitted(true);
@@ -314,14 +389,58 @@ export function ContactBlock({ quote }: { quote?: QuoteContent }) {
           <h3>{quote?.form_title}</h3>
 
           {submitted && (
-            <div style={{ background: "rgba(16, 185, 129, 0.15)", border: "1px solid #10b981", color: "#10b981", padding: "0.75rem 1rem", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>
-              ✓ Thank you! Your quote request has been received. Our team will contact you shortly.
+            <div
+              style={{
+                background: "rgba(16, 185, 129, 0.15)",
+                border: "1px solid #10b981",
+                color: "#10b981",
+                padding: "0.75rem 1rem",
+                borderRadius: 8,
+                fontSize: "0.85rem",
+                marginBottom: "1rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "0.5rem",
+              }}
+            >
+              <span>✓ Thank you! Your quote request has been received. Our team will contact you shortly.</span>
+              <button
+                type="button"
+                onClick={() => setSubmitted(false)}
+                style={{ color: "#10b981", fontWeight: 700, fontSize: "1rem", lineHeight: 1 }}
+                aria-label="Dismiss message"
+              >
+                ×
+              </button>
             </div>
           )}
 
           {error && (
-            <div style={{ background: "rgba(239, 68, 68, 0.15)", border: "1px solid #ef4444", color: "#ef4444", padding: "0.75rem 1rem", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>
-              {error}
+            <div
+              style={{
+                background: "rgba(239, 68, 68, 0.15)",
+                border: "1px solid #ef4444",
+                color: "#ef4444",
+                padding: "0.75rem 1rem",
+                borderRadius: 8,
+                fontSize: "0.85rem",
+                marginBottom: "1rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "0.5rem",
+              }}
+            >
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                style={{ color: "#ef4444", fontWeight: 700, fontSize: "1rem", lineHeight: 1 }}
+                aria-label="Dismiss error"
+              >
+                ×
+              </button>
             </div>
           )}
 
@@ -584,7 +703,7 @@ export function ThemePage({
   quote?: QuoteContent;
   siteSettings?: SiteSettings;
 }) {
-  const { dark, toggleTheme } = useTheme("dark");
+  const { dark, toggleTheme } = useTheme();
   const pathname = usePathname();
   const routeClass = "route-" + (pathname.split("/").filter(Boolean).join("-") || "home");
   return (

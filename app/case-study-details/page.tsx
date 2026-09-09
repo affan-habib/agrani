@@ -1,19 +1,9 @@
-import { notFound } from "next/navigation";
-import { ThemePage } from "@/components/site-chrome";
-import { publicApi } from "@/lib/public-api/services";
-import { PublicApiError } from "@/lib/public-api/client";
-import { CaseStudyContent } from "./case-study-content";
+import { redirect, notFound } from "next/navigation";
 
 export default async function CaseStudyDetailsRoute({ searchParams }: { searchParams: Promise<{ slug?: string | string[] }> }) {
   const requestedSlug = (await searchParams).slug;
-  if (typeof requestedSlug !== "string" || !requestedSlug) notFound();
-  let study;
-  try {
-    study = await publicApi.getCaseStudyBySlug(requestedSlug);
-  } catch (error) {
-    if (error instanceof PublicApiError && error.status === 404) notFound();
-    throw error;
+  if (typeof requestedSlug === "string" && requestedSlug) {
+    redirect(`/case-studies/${encodeURIComponent(requestedSlug)}`);
   }
-  const listing = await publicApi.getCaseStudies({ per_page: 1 });
-  return <ThemePage active="Others" quote={listing.page_content?.quote} siteSettings={listing.page_content?.site_settings}><CaseStudyContent study={study} pageContent={listing.page_content} /></ThemePage>;
+  notFound();
 }

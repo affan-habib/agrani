@@ -25,6 +25,13 @@ export function BlogContent({ posts, categories, pageContent, meta, activeCatego
       <PageIntro label={hero?.eyebrow || ""} title={hero?.title || ""} copy={hero?.description || undefined} />
       <section className="blog-listing container">
         <nav className="blog-category-tabs" aria-label="Blog categories">
+          <button
+            className={!activeCategory ? "active" : ""}
+            onClick={() => router.push("/blog", { scroll: false })}
+            type="button"
+          >
+            All
+          </button>
           {categories.map((category) => (
             <button
               className={activeCategory === category.slug ? "active" : ""}
@@ -40,7 +47,7 @@ export function BlogContent({ posts, categories, pageContent, meta, activeCatego
         <div className="blog-grid">
           {filtered.length ? filtered.map((post, index) => (
             <motion.div key={post.slug} initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} whileHover={{ y: -6 }}>
-              <Link href={`/blog-details?slug=${post.slug}`} className="blog-card">
+              <Link href={`/blog/${post.slug}`} className="blog-card">
                 <div className="blog-img-wrap">
                   <ContentImage media={post.featured_media} fill sizes="608px" alt={post.title} className="blog-image-desktop" />
                   <ContentImage media={post.featured_media} fill sizes="100vw" alt="" className="blog-image-mobile" />

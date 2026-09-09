@@ -15,7 +15,7 @@ export function CaseStudiesContent({ studies, pageContent }: { studies: CaseStud
         <div className="blog-grid">
           {studies.length ? studies.map((study) => (
             <motion.div key={study.slug} initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} whileHover={{ y: -6 }}>
-              <Link href={`/case-study-details?slug=${study.slug}`} className="blog-card">
+              <Link href={`/case-studies/${study.slug}`} className="blog-card">
                 <div className="blog-img-wrap">
                   <ContentImage media={study.featured_media} fill sizes="608px" alt={study.title} className="blog-image-desktop" />
                   <ContentImage media={study.featured_media} fill sizes="100vw" alt="" className="blog-image-mobile" />

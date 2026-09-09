@@ -49,7 +49,7 @@ export function BlogDetailsContent({ post, pageContent, settings }: { post: Blog
           <div className="blog-grid compact">
             {post.related_posts.map((related) => (
               <motion.div key={related.slug} whileHover={{ y: -4 }}>
-                <Link className="blog-card" href={`/blog-details?slug=${related.slug}`}>
+                <Link className="blog-card" href={`/blog/${related.slug}`}>
                   <div className="blog-img-wrap"><ContentImage media={related.featured_media} fill sizes="(max-width: 768px) 100vw, 590px" alt={related.title} /></div>
                   {related.author?.name && <small>{related.author.name}</small>}
                   <h3>{related.title}</h3>
